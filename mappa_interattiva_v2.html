@@ -96,8 +96,22 @@ const REGIONS=[{"n":"Piemonte","it":"Piemonte","de":"Piemont","d":"M75.2,143.1 L
     p.style.cursor='pointer'; p.style.transition='fill 0.12s';
     pathByName[r.n]=p;
     p.addEventListener('mouseenter',()=>{ hintEl.textContent=r.it+(r.de?' ('+r.de+')':''); });
-    p.addEventListener('click',(e)=>{ e.preventDefault(); setLevel(r.n,+1); });
+    // MOUSE: click sx = +1, click dx = -1
+    p.addEventListener('click',(e)=>{ if(p._touched) return; e.preventDefault(); setLevel(r.n,+1); });
     p.addEventListener('contextmenu',(e)=>{ e.preventDefault(); setLevel(r.n,-1); });
+    // TABLET: tap = +1, doppio-tap rapido = -1
+    p.addEventListener('touchend',(e)=>{
+      e.preventDefault();
+      p._touched=true; setTimeout(()=>{ p._touched=false; }, 600);
+      const now=Date.now();
+      if(p._lastTap && (now - p._lastTap) < 350){
+        setLevel(r.n,-2);
+        p._lastTap=0;
+      } else {
+        setLevel(r.n,+1);
+        p._lastTap=now;
+      }
+    }, {passive:false});
     pathsG.appendChild(p);
     // etichetta bilingue
     const t=document.createElementNS('http://www.w3.org/2000/svg','text');
