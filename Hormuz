@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oil Depletion Tracker 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center">Global Oil Depletion Tracker 2026</h1>
+    
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
+        <label class="block mb-2 font-semibold">Scenario di consumo:</label>
+        <select id="scenario" class="w-full p-2 mb-4 bg-gray-700 rounded border border-gray-600 text-white">
+            <option value="-3.5">Scenario Medio (-3.5 mb/d)</option>
+            <option value="-4.6">Scenario Pessimista (-4.6 mb/d)</option>
+        </select>
+        
+        <div id="results" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+            <div class="p-4 bg-yellow-900/30 rounded border border-yellow-700">
+                <h3 class="text-yellow-500 font-bold">Soglia 7.0 (Alert)</h3>
+                <p id="alertDate" class="text-xl">-</p>
+            </div>
+            <div class="p-4 bg-red-900/30 rounded border border-red-700">
+                <h3 class="text-red-500 font-bold">Soglia 6.8 (Critica)</h3>
+                <p id="criticalDate" class="text-xl">-</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-lg">
+        <canvas id="oilChart"></canvas>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('oilChart').getContext('2d');
+    let chart;
+
+    function calculateDepletion() {
+        const startInventory = 7.38;
+        const critical = 6.8;
+        const alert = 7.0;
+        const consumptionRate = parseFloat(document.getElementById('scenario').value);
+        
+        const labels = [];
+        const data = [];
+        
+        let alertDate = "Oltre il 2026";
+        let criticalDate = "Oltre il 2026";
+        
+        for (let i = 0; i <= 200; i++) {
+            let date = new Date('2026-06-15');
+            date.setDate(date.getDate() + i);
+            labels.push(date.toLocaleDateString());
+            
+            let val = startInventory + (consumptionRate * (i / 1000)); // Rate in billions per day
+            data.push(val);
+            
+            if (val <= alert && alertDate === "Oltre il 2026") alertDate = date.toLocaleDateString();
+            if (val <= critical && criticalDate === "Oltre il 2026") criticalDate = date.toLocaleDateString();
+        }
+        
+        document.getElementById('alertDate').innerText = alertDate;
+        document.getElementById('criticalDate').innerText = criticalDate;
+        
+        if (chart) chart.destroy();
+        
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Riserve (Miliardi di barili)',
+                    data: data,
+                    borderColor: '#3b82f6',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { min: 6.5, max: 7.5 }
+                }
+            }
+        });
+    }
+
+    document.getElementById('scenario').addEventListener('change', calculateDepletion);
+    calculateDepletion();
+</script>
+
+</body>
+</html>
