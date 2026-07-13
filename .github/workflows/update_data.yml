@@ -1,8 +1,8 @@
-name: Aggiornamento Dati AGSI
+name: AGSI Data Update
 
 on:
   schedule:
-    - cron: '0 6 * * 1' # Runs each Momnday at 06:00 UTC
+    - cron: '0 6 * * 1' # Runs each Monday at 06:00 UTC
   workflow_dispatch: # Can be run manually with a click on GitHub
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
 
         headers = {'x-key': os.environ.get('AGSI_KEY')}
         start_date = '2025-10-01'
-        target_end = '2026-11-01' # Data di fine del tuo grafico attuale
+        target_end = '2026-11-01' # End date of the current chart timeline
 
         def fetch_data(country=None):
             url = f'https://agsi.gie.eu/api?from={start_date}&size=600'
@@ -51,7 +51,7 @@ jobs:
                         pass
             return data_map
 
-        # API calls (Senza country = Aggregato UE)
+        # API calls (Without country = EU Aggregate)
         eu_map = fetch_data()
         de_map = fetch_data('DE')
         it_map = fetch_data('IT')
@@ -64,7 +64,7 @@ jobs:
             dates_labels.append(current.strftime('%Y-%m-%d'))
             current += timedelta(days=1)
 
-        # FInd the dates really covered by real data of all three sets (EU, IT, DE)
+        # Find the dates actually covered by real data across all three sets (EU, IT, DE)
         available_dates = sorted(list(set(eu_map.keys()) & set(de_map.keys()) & set(it_map.keys())))
         
         eu_hist, de_hist, it_hist = [], [], []
@@ -74,13 +74,26 @@ jobs:
                 de_hist.append(de_map[d])
                 it_hist.append(it_map[d])
             else:
-                break # Stop when real data finish (projection starts)
+                break # Stop when real data finishes (projection starts)
+
+        # Calculate 30-day rolling average rate from the latest real data
+        if len(eu_hist) >= 30:
+            last = len(eu_hist) - 1
+            prev = last - 30
+            eu_rate = (eu_hist[last] - eu_hist[prev]) / 30
+            de_rate = (de_hist[last] - de_hist[prev]) / 30
+            it_rate = (it_hist[last] - it_hist[prev]) / 30
+        else:
+            eu_rate, de_rate, it_rate = 0.27, 0.26, 0.28 # calculated on may and june 2026.
 
         output = {
             'datesLabels': dates_labels,
             'euHist': eu_hist,
             'deHist': de_hist,
-            'itHist': it_hist
+            'itHist': it_hist,
+            'euDefaultRate': round(eu_rate, 2),
+            'deDefaultRate': round(de_rate, 2),
+            'itDefaultRate': round(it_rate, 2)
         }
 
         with open('data.json', 'w') as f:
@@ -92,4 +105,4 @@ jobs:
         git config --global user.name 'AGSI Bot'
         git config --global user.email 'bot@github.com'
         git add data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Dati AGSI aggiornati in automatico" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update of AGSI data and rolling projections" && git push)
