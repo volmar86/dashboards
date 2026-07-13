@@ -37,12 +37,14 @@ jobs:
         start_date = '2025-10-01'
         target_end = '2026-11-01'
 
-        def fetch_data(country):
+        def fetch_data(region_code):
             data_map = {}
             page = 1
+            # GIE API requires 'type=EU' for Europe aggregate and 'country=CODE' for specific countries
+            param_str = 'type=EU' if region_code == 'EU' else f'country={region_code}'
+            
             while True:
-                # API restricts the maximum size per page to 300 entries as documented
-                url = f'https://agsi.gie.eu/api?country={country}&from={start_date}&to={target_end}&size=300&page={page}'
+                url = f'https://agsi.gie.eu/api?{param_str}&from={start_date}&to={target_end}&size=300&page={page}'
                 try:
                     res = requests.get(url, headers=headers).json()
                     raw_data = res.get('data', [])
@@ -58,22 +60,22 @@ jobs:
                                 data_map[date_str] = float(full_val)
                                 new_elements = True
                     
-                    # Exit loop if the current page contains no new calendar dates
                     if not new_elements:
                         break
                     page += 1
                 except Exception as e:
-                    print(f'Error fetching data for {country} on page {page}: {e}')
+                    print(f'Error fetching data for {region_code} on page {page}: {e}')
                     break
-            # Return the collected dataset sorted chronologically ascending
             return dict(sorted(data_map.items()))
 
-        # Fetch independent clean historical data series for each zone
+        # Fetch isolated timelines using proper dynamic query fields
         eu_map = fetch_data('EU')
         de_map = fetch_data('DE')
         it_map = fetch_data('IT')
 
-        # Generate the full continuous calendar timeline required by the HTML dashboard
+        print(f'Fetched records count -> EU: {len(eu_map)}, DE: {len(de_map)}, IT: {len(it_map)}')
+
+        # Generate the full evaluation calendar grid
         current = datetime.strptime(start_date, '%Y-%m-%d')
         end_target_dt = datetime.strptime(target_end, '%Y-%m-%d')
         dates_labels = []
@@ -81,13 +83,17 @@ jobs:
             dates_labels.append(current.strftime('%Y-%m-%d'))
             current += timedelta(days=1)
 
-        # Determine the final shared date containing real dataset values across all regions
+        # Intersect keys to find valid matching historical operational days
         common_dates = set(eu_map.keys()) & set(de_map.keys()) & set(it_map.keys())
-        max_historical_date = max(common_dates) if common_dates else start_date
+        
+        # Hard check: stop execution and raise failure if datasets did not match properly
+        if not common_dates:
+            raise ValueError('CRITICAL: No overlapping historical dates found. API response might be empty.')
+
+        max_historical_date = max(common_dates)
+        print(f'Latest synchronized historical date: {max_historical_date}')
 
         eu_hist, de_hist, it_hist = [], [], []
-        
-        # Safe baseline values to fallback on if initial data contains gaps
         last_eu, last_de, last_it = 80.0, 75.0, 90.0
 
         for d in dates_labels:
@@ -100,10 +106,14 @@ jobs:
                 de_hist.append(last_de)
                 it_hist.append(last_it)
             else:
-                # Stop historical arrays allocation once the future simulation window is reached
                 break
 
-        # Calculate the 30-day rolling average trends using the latest real data points
+        print(f'Total structured historical entries: {len(eu_hist)}')
+
+        if len(eu_hist) <= 1:
+            raise ValueError('CRITICAL: Processing terminated prematurely. Historical arrays are empty.')
+
+        # Extract standard operational trends from the latest 30 working intervals
         if len(eu_hist) >= 30:
             eu_rate = (eu_hist[-1] - eu_hist[-30]) / 30
             de_rate = (de_hist[-1] - de_hist[-30]) / 30
@@ -123,7 +133,7 @@ jobs:
 
         with open('data.json', 'w') as f:
             json.dump(output, f, indent=4)
-        print('JSON update completed successfully.')
+        print('Target data.json updated successfully.')
         "
 
     - name: Save in GitHub server
