@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hormuz Gas Predictor & Storage Simulator v2.5</title>
+    <title>Hormuz Gas Predictor & Storage Simulator v2.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
                     <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
                         <span class="lang-it">Predittore Stoccaggi Gas Avanzato</span> 
                         <span class="lang-en hidden">Advanced Natural Gas Storage Predictor</span> 
-                        <span class="text-xs font-semibold px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-300">v2.5</span>
+                        <span class="text-xs font-semibold px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-300">v2.6</span>
                     </h1>
                 </div>
             </div>
@@ -60,19 +60,38 @@
                             <div>
                                 <span class="text-xs font-bold text-slate-300 block lang-it">Aggiustamento Stagionale (Autunno)</span>
                                 <span class="text-xs font-bold text-slate-300 block lang-en hidden">Seasonal Autumn Adjustment</span>
-                                <span class="text-[10px] text-slate-500 block lang-it">Usa trend storici 3 anni per Settembre/Ottobre</span>
-                                <span class="text-[10px] text-slate-500 block lang-en hidden font-light">Uses 3-year historical baseline for Sept/Oct</span>
+                                <span class="text-[10px] text-slate-500 block lang-it">Attiva i trend storici reali per Settembre/Ottobre</span>
+                                <span class="text-[10px] text-slate-500 block lang-en hidden font-light">Enables real historical trends for Sept/Oct</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="seasonalToggle" class="sr-only peer" checked>
                                 <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 peer-checked:after:bg-white"></div>
                             </label>
                         </div>
+
+                        <div id="seasonalParamsBox" class="pt-3 border-t border-slate-900 space-y-3">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider lang-it">Modifica Target Autunnali (% / giorno)</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider lang-en hidden">Override Autumn Rates (% / day)</div>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div class="space-y-2">
+                                    <span class="block text-[11px] text-slate-400 font-semibold border-b border-slate-900 pb-0.5">Settembre</span>
+                                    <label class="text-[10px] text-slate-500 block">EU: <input type="number" id="inputSeptEU" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-emerald-400 font-mono font-bold mt-0.5"></label>
+                                    <label class="text-[10px] text-slate-500 block">DE: <input type="number" id="inputSeptDE" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-amber-400 font-mono font-bold mt-0.5"></label>
+                                    <label class="text-[10px] text-slate-500 block">IT: <input type="number" id="inputSeptIT" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-blue-400 font-mono font-bold mt-0.5"></label>
+                                </div>
+                                <div class="space-y-2">
+                                    <span class="block text-[11px] text-slate-400 font-semibold border-b border-slate-900 pb-0.5">Ottobre</span>
+                                    <label class="text-[10px] text-slate-500 block">EU: <input type="number" id="inputOctEU" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-emerald-400 font-mono font-bold mt-0.5"></label>
+                                    <label class="text-[10px] text-slate-500 block">DE: <input type="number" id="inputOctDE" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-amber-400 font-mono font-bold mt-0.5"></label>
+                                    <label class="text-[10px] text-slate-500 block">IT: <input type="number" id="inputOctIT" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-blue-400 font-mono font-bold mt-0.5"></label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="border-b border-slate-800 pb-2">
-                        <h2 class="text-sm font-bold text-white uppercase tracking-wider lang-it">Tassi di Scenario Correnti</h2>
-                        <h2 class="text-sm font-bold text-white uppercase tracking-wider lang-en hidden">Current Scenario Rates</h2>
+                    <div class="border-b border-slate-800 pb-1">
+                        <h2 class="text-xs font-bold text-white uppercase tracking-wider lang-it">Tassi Lineari Estivi (Correnti)</h2>
+                        <h2 class="text-xs font-bold text-white uppercase tracking-wider lang-en hidden">Current Summer Linear Rates</h2>
                     </div>
 
                     <div class="space-y-1">
@@ -160,6 +179,15 @@
         const txtDE = document.getElementById('predDEText');
         const txtIT = document.getElementById('predITText');
         const seasonalToggle = document.getElementById('seasonalToggle');
+        const seasonalParamsBox = document.getElementById('seasonalParamsBox');
+
+        // Target numeric input overrides for the seasonal parameters
+        const inputSeptEU = document.getElementById('inputSeptEU');
+        const inputSeptDE = document.getElementById('inputSeptDE');
+        const inputSeptIT = document.getElementById('inputSeptIT');
+        const inputOctEU = document.getElementById('inputOctEU');
+        const inputOctDE = document.getElementById('inputOctDE');
+        const inputOctIT = document.getElementById('inputOctIT');
 
         const ctx = document.getElementById('storageChart').getContext('2d');
         let storageChart = null; let currentLang = 'it';
@@ -181,6 +209,16 @@
                 sliderIT.value = ratesData.IT[selectedWindow];
                 updateSim();
             }
+        }
+
+        function resetSeasonalInputsToDefault() {
+            if (!ratesData.EU) return;
+            inputSeptEU.value = ratesData.EU.septHist;
+            inputSeptDE.value = ratesData.DE.septHist;
+            inputSeptIT.value = ratesData.IT.septHist;
+            inputOctEU.value = ratesData.EU.octHist;
+            inputOctDE.value = ratesData.DE.octHist;
+            inputOctIT.value = ratesData.IT.octHist;
         }
 
         function buildProjections() {
@@ -217,15 +255,15 @@
                 let currentRateDE = rDE;
                 let currentRateIT = rIT;
 
-                if (isSeasonalActive && ratesData.EU) {
+                if (isSeasonalActive) {
                     if (month === 9) {
-                        currentRateEU = ratesData.EU.septHist;
-                        currentRateDE = ratesData.DE.septHist;
-                        currentRateIT = ratesData.IT.septHist;
+                        currentRateEU = parseFloat(inputSeptEU.value) || 0;
+                        currentRateDE = parseFloat(inputSeptDE.value) || 0;
+                        currentRateIT = parseFloat(inputSeptIT.value) || 0;
                     } else if (month === 10) {
-                        currentRateEU = ratesData.EU.octHist;
-                        currentRateDE = ratesData.DE.octHist;
-                        currentRateIT = ratesData.IT.octHist;
+                        currentRateEU = parseFloat(inputOctEU.value) || 0;
+                        currentRateDE = parseFloat(inputOctDE.value) || 0;
+                        currentRateIT = parseFloat(inputOctIT.value) || 0;
                     }
                 }
 
@@ -305,7 +343,22 @@
         sliderEU.addEventListener('input', updateSim);
         sliderDE.addEventListener('input', updateSim);
         sliderIT.addEventListener('input', updateSim);
-        seasonalToggle.addEventListener('change', updateSim);
+        
+        // Input listeners for the custom parameters box to render shifts fluidly
+        [inputSeptEU, inputSeptDE, inputSeptIT, inputOctEU, inputOctDE, inputOctIT].forEach(input => {
+            input.addEventListener('input', updateSim);
+        });
+
+        seasonalToggle.addEventListener('change', () => {
+            if (seasonalToggle.checked) {
+                seasonalParamsBox.classList.remove('hidden');
+                resetSeasonalInputsToDefault(); // Re-apply default parameters dynamically on click
+            } else {
+                seasonalParamsBox.classList.add('hidden');
+            }
+            updateSim();
+        });
+
         document.getElementById('langToggleBtn').addEventListener('click', toggleLanguage);
 
         window.onload = function() {
@@ -320,6 +373,8 @@
                     sliderEU.value = ratesData.EU[selectedWindow];
                     sliderDE.value = ratesData.DE[selectedWindow];
                     sliderIT.value = ratesData.IT[selectedWindow];
+
+                    resetSeasonalInputsToDefault();
 
                     const lastDate = datesLabels[histLength - 1];
                     document.getElementById('lastUpdateTextIT').innerText = " | Last data: " + lastDate;
