@@ -37,14 +37,15 @@ jobs:
         start_date = '2025-10-01'
         target_end = '2026-11-01'
 
-        def fetch_data(region_code):
+        def fetch_data(region_code, custom_start=None, custom_end=None):
             data_map = {}
             page = 1
-            # GIE API requires 'type=EU' for Europe aggregate and 'country=CODE' for specific countries
             param_str = 'type=EU' if region_code == 'EU' else f'country={region_code}'
+            q_start = custom_start if custom_start else start_date
+            q_end = custom_end if custom_end else target_end
             
             while True:
-                url = f'https://agsi.gie.eu/api?{param_str}&from={start_date}&to={target_end}&size=300&page={page}'
+                url = f'https://agsi.gie.eu/api?{param_str}&from={q_start}&to={q_end}&size=300&page={page}'
                 try:
                     res = requests.get(url, headers=headers).json()
                     raw_data = res.get('data', [])
@@ -64,34 +65,48 @@ jobs:
                         break
                     page += 1
                 except Exception as e:
-                    print(f'Error fetching data for {region_code} on page {page}: {e}')
+                    print(f'Error fetching {region_code}: {e}')
                     break
             return dict(sorted(data_map.items()))
 
-        # Fetch isolated timelines using proper dynamic query fields
+        def get_seasonal_rates(region_code):
+            sept_deltas = []
+            oct_deltas = []
+            for year in ['2023', '2024', '2025']:
+                historical = fetch_data(region_code, f'{year}-09-01', f'{year}-10-31')
+                sorted_dates = sorted(list(historical.keys()))
+                for i in range(len(sorted_dates) - 1):
+                    d1, d2 = sorted_dates[i], sorted_dates[i+1]
+                    dt1 = datetime.strptime(d1, '%Y-%m-%d')
+                    dt2 = datetime.strptime(d2, '%Y-%m-%d')
+                    if (dt2 - dt1).days == 1:
+                        delta = historical[d2] - historical[d1]
+                        if dt1.month == 9:
+                            sept_deltas.append(delta)
+                        elif dt1.month == 10:
+                            oct_deltas.append(delta)
+            
+            avg_sept = sum(sept_deltas) / len(sept_deltas) if sept_deltas else 0.05
+            avg_oct = sum(oct_deltas) / len(oct_deltas) if oct_deltas else -0.15
+            return round(avg_sept, 3), round(avg_oct, 3)
+
+        # Fetch primary time series datasets
         eu_map = fetch_data('EU')
         de_map = fetch_data('DE')
         it_map = fetch_data('IT')
 
-        print(f'Fetched records count -> EU: {len(eu_map)}, DE: {len(de_map)}, IT: {len(it_map)}')
+        common_dates = set(eu_map.keys()) & set(de_map.keys()) & set(it_map.keys())
+        if not common_dates:
+            raise ValueError('CRITICAL: Empty response from primary AGSI API nodes.')
 
-        # Generate the full evaluation calendar grid
+        max_historical_date = max(common_dates)
+        
         current = datetime.strptime(start_date, '%Y-%m-%d')
         end_target_dt = datetime.strptime(target_end, '%Y-%m-%d')
         dates_labels = []
         while current <= end_target_dt:
             dates_labels.append(current.strftime('%Y-%m-%d'))
             current += timedelta(days=1)
-
-        # Intersect keys to find valid matching historical operational days
-        common_dates = set(eu_map.keys()) & set(de_map.keys()) & set(it_map.keys())
-        
-        # Hard check: stop execution and raise failure if datasets did not match properly
-        if not common_dates:
-            raise ValueError('CRITICAL: No overlapping historical dates found. API response might be empty.')
-
-        max_historical_date = max(common_dates)
-        print(f'Latest synchronized historical date: {max_historical_date}')
 
         eu_hist, de_hist, it_hist = [], [], []
         last_eu, last_de, last_it = 80.0, 75.0, 90.0
@@ -101,39 +116,43 @@ jobs:
                 if d in eu_map: last_eu = eu_map[d]
                 if d in de_map: last_de = de_map[d]
                 if d in it_map: last_it = it_map[d]
-                
                 eu_hist.append(last_eu)
                 de_hist.append(last_de)
                 it_hist.append(last_it)
             else:
                 break
 
-        print(f'Total structured historical entries: {len(eu_hist)}')
+        # Calculate multiple multi-scale rolling dynamic window averages
+        def calc_windows(h_list):
+            r15 = (h_list[-1] - h_list[-15]) / 15 if len(h_list) >= 15 else 0.25
+            r30 = (h_list[-1] - h_list[-30]) / 30 if len(h_list) >= 30 else 0.26
+            r60 = (h_list[-1] - h_list[-60]) / 60 if len(h_list) >= 60 else 0.22
+            return round(r15, 2), round(r30, 2), round(r60, 2)
 
-        if len(eu_hist) <= 1:
-            raise ValueError('CRITICAL: Processing terminated prematurely. Historical arrays are empty.')
+        eu_15, eu_30, eu_60 = calc_windows(eu_hist)
+        de_15, de_30, de_60 = calc_windows(de_hist)
+        it_15, it_30, it_60 = calc_windows(it_hist)
 
-        # Extract standard operational trends from the latest 30 working intervals
-        if len(eu_hist) >= 30:
-            eu_rate = (eu_hist[-1] - eu_hist[-30]) / 30
-            de_rate = (de_hist[-1] - de_hist[-30]) / 30
-            it_rate = (it_hist[-1] - it_hist[-30]) / 30
-        else:
-            eu_rate, de_rate, it_rate = 0.27, 0.26, 0.28
+        # Extract 3-year aggregate seasonal profiles for autumn parameters
+        eu_sept, eu_oct = get_seasonal_rates('EU')
+        de_sept, de_oct = get_seasonal_rates('DE')
+        it_sept, it_oct = get_seasonal_rates('IT')
 
         output = {
             'datesLabels': dates_labels,
             'euHist': eu_hist,
             'deHist': de_hist,
             'itHist': it_hist,
-            'euDefaultRate': round(eu_rate, 2),
-            'deDefaultRate': round(de_rate, 2),
-            'itDefaultRate': round(it_rate, 2)
+            'rates': {
+                'EU': {'15': eu_15, '30': eu_30, '60': eu_60, 'septHist': eu_sept, 'octHist': eu_oct},
+                'DE': {'15': de_15, '30': de_30, '60': de_60, 'septHist': de_sept, 'octHist': de_oct},
+                'IT': {'15': it_15, '30': it_30, '60': it_60, 'septHist': it_sept, 'octHist': it_oct}
+            }
         }
 
         with open('data.json', 'w') as f:
             json.dump(output, f, indent=4)
-        print('Target data.json updated successfully.')
+        print('Structured update completed.')
         "
 
     - name: Save in GitHub server
