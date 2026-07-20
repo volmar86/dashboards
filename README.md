@@ -45,3 +45,25 @@ Interactive tools intended for use in my Montessori teaching activity.
 ---
 
 ## Repository structure
+
+dashboards/
+├── .github/workflows/ # Scheduled GitHub Action (weekly data update)
+├── dashboards_live/ # Dashboards fed by external, auto-updated data
+│ └── lng-predictor/
+│ ├── index.html # The dashboard
+│ ├── data.json # Live data (refreshed by the Action)
+│ └── data_fallback.json # Frozen backup snapshot
+├── dashboards_static/ # Dashboards with data embedded in the HTML
+├── montessori_dashboards/ # Teaching tools
+└── README.md
+
+## How the live update works
+
+A GitHub Action runs on a weekly schedule, pulls the latest figures from the
+GIE AGSI API, recomputes the rolling and seasonal rates, and commits the
+refreshed `data.json` back to the repository. The dashboard reads that file
+on load.
+
+---
+
+*Built and maintained by [@volmar86](https://github.com/volmar86).*
