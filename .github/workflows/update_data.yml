@@ -150,7 +150,7 @@ jobs:
             }
         }
 
-        with open('data.json', 'w') as f:
+        with open('dashboards_live/lng-predictor/data.json', 'w') as f:
             json.dump(output, f, indent=4)
         print('Structured update completed.')
         "
@@ -159,5 +159,5 @@ jobs:
       run: |
         git config --global user.name 'AGSI Bot'
         git config --global user.email 'bot@github.com'
-        git add data.json
+        git add dashboards_live/lng-predictor/data.json
         git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update of AGSI data and rolling projections" && git push)
