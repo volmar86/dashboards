@@ -8,15 +8,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js (Versione UMD stabile v4) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- Adapter temporale con date-fns pre-pacchettizzato (Risolve problemi di dipendenze esterne) -->
+    <!-- Adapter temporale con date-fns pre-pacchettizzato -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <!-- Google Fonts: Inter per un'eccellente leggibilità -->
+    <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Scrollbar personalizzata premium per la modalità scura */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -47,9 +46,9 @@
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
                         <span data-i18n="app-title">Hormuz Crisis Simulator</span> 
-                        <span class="text-xs font-semibold px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-300">v2.5</span>
+                        <span class="text-xs font-semibold px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-300">v2.6</span>
                     </h1>
-                    <p class="text-xs text-slate-400" data-i18n="app-subtitle">Modello interattivo di svuotamento delle riserve petrolifere con serie storica reale da Marzo 2026</p>
+                    <p class="text-xs text-slate-400" data-i18n="app-subtitle">Modello interattivo di svuotamento delle riserve petrolifere con serie storica reale fino a Giugno 2026</p>
                 </div>
             </div>
             
@@ -61,7 +60,7 @@
                 
                 <div class="flex items-center gap-2 text-xs bg-slate-800/40 border border-slate-700/50 px-3 py-1.5 rounded-lg text-slate-400">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span data-i18n="app-timeline">Scenario 2026</span>
+                    <span data-i18n="app-timeline">Scenario Marzo - Dicembre 2026</span>
                 </div>
             </div>
         </div>
@@ -76,15 +75,15 @@
                 <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
                     <div class="border-b border-slate-800 pb-4">
                         <h2 class="text-lg font-semibold text-white" data-i18n="sidebar-title">Parametri di Simulazione</h2>
-                        <p class="text-xs text-slate-400" data-i18n="sidebar-subtitle">Modifica il deficit futuro per testare la tenuta del sistema partendo dall'ultimo dato reale.</p>
+                        <p class="text-xs text-slate-400" data-i18n="sidebar-subtitle">Modifica il deficit futuro per testare la tenuta del sistema partendo dall'ultimo dato reale di fine Giugno.</p>
                     </div>
 
                     <!-- Selezione Tipo Riserve -->
                     <div class="space-y-2">
                         <label class="text-sm font-medium text-slate-300 block" data-i18n="label-reserve-type">Tipo di Riserva da Tracciare</label>
                         <select id="reserveType" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                            <option value="commercial" selected data-i18n="opt-commercial">Scorte Commerciali a Terra (Consigliato, Inizio 7.85B)</option>
-                            <option value="global" data-i18n="opt-global">Scorte Globali Osservate IEA (Inizio 8.20B)</option>
+                            <option value="commercial" selected data-i18n="opt-commercial">Scorte Commerciali a Terra (Consigliato, Fine Giu: 7.40B)</option>
+                            <option value="global" data-i18n="opt-global">Scorte Globali Osservate IEA (Fine Giu: 7.521B)</option>
                         </select>
                         <p class="text-[11px] text-slate-500 italic leading-relaxed" id="reserveDesc" data-i18n="desc-commercial">
                             Mostra solo il petrolio stoccato nei serbatoi terrestri delle raffinerie. È la metrica corretta per calcolare il collasso fisico dei flussi (6.8B).
@@ -95,24 +94,24 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <label for="deficitNumber" class="text-sm font-medium text-slate-300" data-i18n="label-deficit">Deficit Giornaliero (Milioni b/g)</label>
-                            <input type="number" id="deficitNumber" step="0.1" min="-8.0" max="2.0" value="-3.8"
+                            <input type="number" id="deficitNumber" step="0.1" min="-8.0" max="2.0" value="-3.5"
                                 class="w-20 bg-slate-950 border border-slate-800 rounded-lg py-1 px-2 text-center text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold">
                         </div>
                         
                         <!-- Range Slider -->
                         <div class="relative pt-1">
-                            <input type="range" id="deficitSlider" min="-8.0" max="2.0" step="0.1" value="-3.8"
+                            <input type="range" id="deficitSlider" min="-8.0" max="2.0" step="0.1" value="-3.5"
                                 class="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-blue-500">
                             <div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1 px-1">
                                 <span>-8.0 (Doomsday)</span>
-                                <span>-3.0</span>
+                                <span>-3.5 (Hormuz Chiuso)</span>
                                 <span>0.0 (Pareggio)</span>
                                 <span>+2.0 (Ripresa)</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Soglia Allerta e Soglia Critica (Personalizzabili) -->
+                    <!-- Soglia Allerta e Soglia Critica -->
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <div class="space-y-1">
                             <label for="thresholdAlert" class="text-xs text-slate-400 block" data-i18n="label-alert-threshold">Soglia Allerta (B)</label>
@@ -137,13 +136,12 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 15H19" />
                         </svg>
-                        <span data-i18n="btn-reset">Ripristina Deficit Medio (-3.8)</span>
+                        <span data-i18n="btn-reset">Ripristina Base (-3.5 mb/d)</span>
                     </button>
                 </div>
 
                 <!-- Metric Cards: Date di Breach previste -->
                 <div class="grid grid-cols-1 gap-4">
-                    <!-- Alert Threshold Card -->
                     <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between gap-4">
                         <div class="space-y-1">
                             <span class="text-xs font-semibold text-amber-500 uppercase tracking-wider" data-i18n="alert-title">Superamento Allerta</span>
@@ -156,7 +154,6 @@
                         </div>
                     </div>
 
-                    <!-- Critical Threshold Card -->
                     <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between gap-4">
                         <div class="space-y-1">
                             <span class="text-xs font-semibold text-rose-500 uppercase tracking-wider" data-i18n="critical-title">Limite Critico Fisico</span>
@@ -177,13 +174,12 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                         <div>
                             <h2 class="text-lg font-semibold text-white" data-i18n="chart-title">Curva di Svuotamento delle Scorte</h2>
-                            <p class="text-xs text-slate-400" data-i18n="chart-subtitle">Serie storica reale (linea continua) e proiezione futura (linea tratteggiata) fino a fine anno</p>
+                            <p class="text-xs text-slate-400" data-i18n="chart-subtitle">Serie storica reale fino a Giugno (linea continua) e proiezione dal 1° Luglio (linea tratteggiata)</p>
                         </div>
-                        <!-- Legenda Personalizzata Esterna -->
                         <div class="flex flex-wrap gap-x-4 gap-y-1.5 text-xs bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
                             <div class="flex items-center gap-1.5">
                                 <span class="w-3 h-1 bg-blue-500 rounded-full inline-block"></span>
-                                <span class="text-slate-300" data-i18n="legend-actual">Reale (Storico)</span>
+                                <span class="text-slate-300" data-i18n="legend-actual">Reale (Storico fino al 30 Giu)</span>
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <span class="w-3 h-0.5 border-t border-dashed border-sky-400 rounded-full inline-block"></span>
@@ -200,7 +196,6 @@
                         </div>
                     </div>
 
-                    <!-- Canvas del Grafico Chart.js -->
                     <div class="relative h-[400px] w-full bg-slate-950/40 rounded-xl p-2 border border-slate-800/50">
                         <canvas id="depletionChart"></canvas>
                     </div>
@@ -212,10 +207,10 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span data-i18n="info-box-title">Nota Metodologica e Analisi di HFI Research</span>
+                        <span data-i18n="info-box-title">Nota Metodologica, Report IEA e Variabile Cina</span>
                     </h3>
                     <p class="text-xs text-slate-300 leading-relaxed" id="analyticalContent" data-i18n="info-box-body">
-                        Come evidenziato dal team di @HFI_Research, il mercato globale si è cullato sul dato fittizio degli 8.2 miliardi di barili totali registrati a inizio anno, ignorando il fatto che la stragrande maggioranza di quel petrolio è bloccato in riserve strategiche statali inaccessibili o stoccato sulle navi in viaggio. Le scorte commerciali terrestri realmente utilizzabili dai raffinatori ammontavano a soli 7.85 miliardi a marzo. Al ritmo di prelievo attuale dovuto al blocco persistente di Hormuz per i vettori del G7, il superamento delle soglie critiche provocherà un blocco operativo delle raffinerie molto prima della fine dell'anno, forzando misure di austerity (Smart Working e Kurzarbeit) in tutta Europa entro autunno 2026.
+                        Il report IEA di Luglio indica un rimbalzo artificiale delle scorte globali a fine Giugno (7.521B), dovuto unicamente all'aumento del petrolio galleggiante in navigazione (+117mb). Le scorte commerciali a terra sono diminuite di 96mb, con la Cina che ha attinto 37mb dai propri serbatoi. Se la Cina dovesse arrestare i prelievi SPR e rientrare come acquirente attivo per ripristinare le scorte, il deficit netto globale aumenterebbe di circa 1.2-1.5 mb/giorno, accelerando il raggiungimento della soglia di blocco degli oleodotti (6.8B) già entro il tardo autunno 2026.
                     </p>
                 </div>
             </section>
@@ -229,7 +224,7 @@
                 &copy; 2026 Hormuz Strait Monitor Project. Tutti i diritti riservati.
             </p>
             <p class="text-xs text-slate-500 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> <span data-i18n="footer-status">Feed dati aggiornato a inizio Luglio 2026</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> <span data-i18n="footer-status">Dati aggiornati al 30 Giugno 2026 (Report IEA Luglio 2026)</span>
             </p>
         </div>
     </footer>
@@ -239,36 +234,36 @@
         const TRANSLATIONS = {
             it: {
                 "app-title": "Hormuz Crisis Simulator",
-                "app-subtitle": "Modello di svuotamento delle riserve petrolifere con serie storica reale da Marzo 2026",
+                "app-subtitle": "Modello interattivo con serie storica reale da Marzo al 30 Giugno 2026",
                 "app-timeline": "Scenario Marzo - Dicembre 2026",
                 "sidebar-title": "Parametri di Simulazione",
-                "sidebar-subtitle": "Modifica il deficit futuro per testare la tenuta del sistema partendo dall'ultimo dato reale.",
+                "sidebar-subtitle": "Modifica il deficit futuro per testare la tenuta del sistema partendo dal dato reale di Giugno.",
                 "label-reserve-type": "Tipo di Riserva da Tracciare",
-                "opt-commercial": "Scorte Commerciali a Terra (Consigliato, Inizio 7.85B)",
-                "opt-global": "Scorte Globali Osservate IEA (Inizio 8.20B)",
+                "opt-commercial": "Scorte Commerciali a Terra (Consigliato, Fine Giu: 7.40B)",
+                "opt-global": "Scorte Globali Osservate IEA (Fine Giu: 7.521B)",
                 "desc-commercial": "Mostra solo il petrolio stoccato nei serbatoi terrestri delle raffinerie. È la metrica corretta per calcolare il collasso fisico dei flussi (6.8B).",
-                "desc-global": "Include anche le riserve strategiche governative e il petrolio attualmente in navigazione marittima. Non si sa quante scorte reali rimangano effettivamente in queste riserve strategiche.",
+                "desc-global": "Include anche le riserve strategiche governative e il petrolio in navigazione (Oil on Water). Il dato di fine giugno ha registrato +117mb in mare ma -96mb a terra.",
                 "label-deficit": "Deficit Giornaliero (Milioni b/g)",
                 "label-alert-threshold": "Soglia Allerta (B)",
                 "label-crit-threshold": "Soglia Critica (B)",
                 "label-classification": "Classificazione Scenario Future",
-                "btn-reset": "Ripristina Deficit Medio (-3.8)",
+                "btn-reset": "Ripristina Base (-3.5 mb/d)",
                 "alert-title": "Superamento Allerta",
                 "critical-title": "Limite Critico Fisico",
                 "chart-title": "Curva di Svuotamento delle Scorte",
-                "chart-subtitle": "Serie storica reale (linea continua) e proiezione futura (linea tratteggiata) fino a fine anno",
-                "legend-actual": "Reale (Storico)",
+                "chart-subtitle": "Serie storica reale fino a Giugno (linea continua) e proiezione dal 1° Luglio (linea tratteggiata)",
+                "legend-actual": "Reale (Storico fino al 30 Giu)",
                 "legend-forecast": "Proiezione (Scenario)",
                 "legend-alert": "Allerta",
                 "legend-critical": "Critico",
-                "info-box-title": "Nota Metodologica e Analisi di HFI Research",
-                "info-box-body": "Come evidenziato dal team di @HFI_Research, il mercato globale si è cullato sul dato fittizio degli 8.2 miliardi di barili totali registrati a inizio anno, ignorando il fatto che la stragrande maggioranza di quel petrolio è bloccato in riserve strategiche statali inaccessibili o stoccato sulle navi in viaggio. Le scorte commerciali terrestri realmente utilizzabili dai raffinatori ammontavano a soli 7.85 miliardi a marzo. Al ritmo di prelievo attuale dovuto al blocco persistente di Hormuz per i vettori del G7, il superamento delle soglie critiche provocherà un blocco operativo delle raffinerie molto prima della fine dell'anno, forzando misure di austerity (Smart Working e Kurzarbeit) in tutta Europa entro autunno 2026. Non è noto quanto petrolio sia rimasto effettivamente all'interno delle riserve strategiche statali globali ad oggi.",
-                "footer-status": "Feed dati aggiornato a inizio Luglio 2026",
+                "info-box-title": "Nota Metodologica, Report IEA e Variabile Cina",
+                "info-box-body": "Il report IEA di Luglio indica un rimbalzo artificiale delle scorte globali a fine Giugno (7.521B), dovuto unicamente all'aumento del petrolio galleggiante in navigazione (+117mb). Le scorte commerciali a terra sono diminuite di 96mb, con la Cina che ha attinto 37mb dai propri serbatoi. Se la Cina dovesse arrestare i prelievi SPR e rientrare come acquirente attivo per ripristinare le scorte, il deficit netto globale aumenterebbe di circa 1.2-1.5 mb/giorno, accelerando il raggiungimento della soglia di blocco degli oleodotti (6.8B) già entro il tardo autunno 2026.",
+                "footer-status": "Dati aggiornati al 30 Giugno 2026 (Report IEA Luglio 2026)",
                 "sc-doomsday": "Doomsday (Collasso Immediato)",
                 "sc-pessimistic": "Scenario Altamente Pessimista",
-                "sc-mid-high": "Scenario Medio-Alto",
-                "sc-medium": "Scenario Medio-Standard",
-                "sc-mid-low": "Scenario Medio-Basso",
+                "sc-mid-high": "Scenario Medio-Alto (-4.5 mb/d)",
+                "sc-medium": "Scenario Standard Hormuz Chiuso (-3.5 mb/d)",
+                "sc-mid-low": "Scenario Blocco Parziale (-2.0 mb/d)",
                 "sc-optimistic": "Scenario Ottimistico",
                 "sc-recovery": "Scenario di Ripresa / Accumulo",
                 "no-breach": "Nessun superamento nel 2026",
@@ -276,36 +271,36 @@
             },
             en: {
                 "app-title": "Hormuz Crisis Simulator",
-                "app-subtitle": "Interactive depletion model of global oil inventories with real historical series from March 2026",
+                "app-subtitle": "Interactive depletion model with real historical data from March to June 30, 2026",
                 "app-timeline": "Scenario March - December 2026",
                 "sidebar-title": "Simulation Parameters",
-                "sidebar-subtitle": "Modify future deficit to test system resilience starting from the latest real historical data.",
+                "sidebar-subtitle": "Modify future deficit to test system resilience starting from June actuals.",
                 "label-reserve-type": "Inventory Metric to Track",
-                "opt-commercial": "Commercial Land Inventories (Recommended, Starts 7.85B)",
-                "opt-global": "IEA Observed Global Stocks (Starts 8.20B)",
-                "desc-commercial": "Displays only the oil physical stored in land tanks at refineries. This is the correct metric to calculate physical line blockages (6.8B).",
-                "desc-global": "Includes strategic government reserves and oil currently in maritime transit. It is currently unknown how much of this volume is left in strategic reserves.",
+                "opt-commercial": "Commercial Land Inventories (Recommended, End-June: 7.40B)",
+                "opt-global": "IEA Observed Global Stocks (End-June: 7.521B)",
+                "desc-commercial": "Displays only physical oil stored in land tanks at refineries. Correct metric for physical line blockage (6.8B).",
+                "desc-global": "Includes strategic government reserves and oil on water. June data logged +117mb floating but -96mb land drawdowns.",
                 "label-deficit": "Daily Deficit (Million b/d)",
                 "label-alert-threshold": "Alert Threshold (B)",
                 "label-crit-threshold": "Critical Threshold (B)",
                 "label-classification": "Future Scenario Classification",
-                "btn-reset": "Reset to Baseline Deficit (-3.8)",
+                "btn-reset": "Reset to Baseline (-3.5 mb/d)",
                 "alert-title": "Alert Breach",
                 "critical-title": "Physical Critical Limit",
                 "chart-title": "Inventory Depletion Trajectory",
-                "chart-subtitle": "Real historical data (solid line) and future projection (dashed line) to year-end",
-                "legend-actual": "Actual (Historical)",
+                "chart-subtitle": "Real historical series to June (solid line) and projection from July 1 (dashed line)",
+                "legend-actual": "Actual (Historical to June 30)",
                 "legend-forecast": "Projection (Scenario)",
                 "legend-alert": "Alert",
                 "legend-critical": "Critical",
-                "info-box-title": "Methodological Note & HFI Research Analysis",
-                "info-box-body": "As highlighted by the @HFI_Research team, the global market complacently relied on the fictitious 8.2 billion barrels of total stocks registered early this year, ignoring that the vast majority of that oil is locked in inaccessible state strategic reserves or floating on ships. Earthbound commercial inventories actually usable by refiners amounted to just 7.85 billion in March. Under the current draw-down rate caused by the persistent Hormuz block on G7 carriers, breaching the critical thresholds will trigger physical refinery blockages long before winter, forcing strict austerity measures (Smart Working and Kurzarbeit) across Europe by Autumn 2026. How much buffer remains inside state strategic reserves is highly uncertain.",
-                "footer-status": "Data feed updated to early July 2026",
+                "info-box-title": "Methodological Note, IEA Report & China Factor",
+                "info-box-body": "The July IEA OMR report shows an artificial bounce in total global stocks at end-June (7.521B), driven purely by floating oil on water (+117mb). Land stocks dropped by 96mb, with China drawing 37mb from domestic tanks. If China halts SPR draws and returns as an active buyer to restock, the global deficit will widen by another 1.2-1.5 mb/d, bringing forward the pipeline disruption threshold (6.8B) to late autumn 2026.",
+                "footer-status": "Data feed updated to June 30, 2026 (IEA July 2026 Report)",
                 "sc-doomsday": "Doomsday (Immediate Collapse)",
                 "sc-pessimistic": "Highly Pessimistic Scenario",
-                "sc-mid-high": "Medium-High Scenario",
-                "sc-medium": "Medium-Standard Scenario",
-                "sc-mid-low": "Medium-Low Scenario",
+                "sc-mid-high": "Medium-High Scenario (-4.5 mb/d)",
+                "sc-medium": "Standard Closed Strait Scenario (-3.5 mb/d)",
+                "sc-mid-low": "Partial Blockade Scenario (-2.0 mb/d)",
                 "sc-optimistic": "Optimistic Scenario",
                 "sc-recovery": "Recovery / Re-stocking Scenario",
                 "no-breach": "No breach detected in 2026",
@@ -316,21 +311,23 @@
         let currentLang = 'it';
 
         // Serie Storica Reale 1: Scorte Commerciali a Terra (HFI / EIA basis)
+        // Mantiene tutta la storia da Marzo al 30 Giugno
         const ACTUALS_COMMERCIAL = [
             { x: new Date(2026, 2, 1), y: 7.85 },   // 1 Marzo
             { x: new Date(2026, 3, 1), y: 7.76 },   // 1 Aprile
             { x: new Date(2026, 4, 1), y: 7.64 },   // 1 Maggio
             { x: new Date(2026, 5, 1), y: 7.50 },   // 1 Giugno
-            { x: new Date(2026, 5, 15), y: 7.43 }   // 15 Giugno (Ultimo dato reale consolidato)
+            { x: new Date(2026, 5, 30), y: 7.40 }   // 30 Giugno (Dato IEA Land-based: -96mb prelievo terra)
         ];
 
         // Serie Storica Reale 2: Scorte Globali Osservate IEA (Inclusi SPR e Oil on Water)
+        // Mantiene tutta la storia da Marzo al 30 Giugno
         const ACTUALS_GLOBAL = [
             { x: new Date(2026, 2, 1), y: 8.20 },   // 1 Marzo
             { x: new Date(2026, 3, 1), y: 8.07 },   // 1 Aprile
             { x: new Date(2026, 4, 1), y: 7.95 },   // 1 Maggio
             { x: new Date(2026, 5, 1), y: 7.81 },   // 1 Giugno
-            { x: new Date(2026, 5, 15), y: 7.74 }   // 15 Giugno
+            { x: new Date(2026, 5, 30), y: 7.521 }  // 30 Giugno (Dato IEA OMR Luglio 2026)
         ];
 
         // --- ACQUISIZIONE ELEMENTI DOM ---
@@ -350,7 +347,6 @@
 
         let myChart = null;
 
-        // --- STREAMING_CHUNK: Traduzione dinamica degli elementi i18n... -->
         function applyTranslations() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -365,11 +361,9 @@
                 }
             });
 
-            // Aggiorna le descrizioni informative del selettore
             const isComm = selectReserveType.value === 'commercial';
             pReserveDesc.innerHTML = TRANSLATIONS[currentLang][isComm ? 'desc-commercial' : 'desc-global'];
 
-            // Forza traduzione etichette legenda di ChartJS
             if (myChart) {
                 myChart.data.datasets[0].label = TRANSLATIONS[currentLang]['legend-actual'];
                 myChart.data.datasets[1].label = TRANSLATIONS[currentLang]['legend-forecast'];
@@ -377,35 +371,31 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Motore di simulazione e calcolo dei breach... -->
         function updateSimulation() {
-            const deficit = parseFloat(inputDeficitNumber.value) || -3.8;
+            const deficit = parseFloat(inputDeficitNumber.value) || -3.5;
             const alertThreshold = parseFloat(inputThresholdAlert.value) || 7.00;
             const criticalThreshold = parseFloat(inputThresholdCritical.value) || 6.80;
             const reserveType = selectReserveType.value;
 
-            // Selezione serie storica in base al tipo di riserva
             const historicalData = reserveType === 'commercial' ? ACTUALS_COMMERCIAL : ACTUALS_GLOBAL;
-            const lastHistoricalPoint = historicalData[historicalData.length - 1];
+            const lastHistoricalPoint = historicalData[historicalData.length - 1]; // 30 Giugno 2026
             const startForecastDate = new Date(lastHistoricalPoint.x);
 
-            // Generazione serie storica reale sul grafico
             const actualPoints = historicalData.map(pt => ({
                 x: pt.x,
                 y: pt.y
             }));
 
-            // Generazione proiezione futura (15 Giugno - 31 Dicembre 2026)
+            // Generazione proiezione futura dal 1° Luglio al 31 Dicembre 2026
             const forecastPoints = [{ x: lastHistoricalPoint.x, y: lastHistoricalPoint.y }];
             const endSimulationDate = new Date(2026, 11, 31);
             
             let currentDate = new Date(startForecastDate);
-            currentDate.setDate(currentDate.getDate() + 1);
+            currentDate.setDate(currentDate.getDate() + 1); // 1° Luglio 2026
 
             let alertDate = null;
             let criticalDate = null;
 
-            // Verifica se le soglie sono già state violate nei dati storici passati
             historicalData.forEach(pt => {
                 if (pt.y <= alertThreshold && !alertDate) {
                     alertDate = 'already-breached';
@@ -415,11 +405,9 @@
                 }
             });
 
-            // Simulazione passo giornaliero
             let currentReserves = lastHistoricalPoint.y;
 
             while (currentDate <= endSimulationDate) {
-                // Conversione da milioni di barili al giorno a miliardi di barili al giorno
                 const dailyDraw = (deficit * 1000000) / 1000000000;
                 currentReserves = Math.max(0, currentReserves + dailyDraw);
 
@@ -451,10 +439,10 @@
             } else if (deficit <= -4.0) {
                 badgeBg = 'bg-amber-950/40 border-amber-500/30 text-amber-400';
                 scenarioTextKey = 'sc-mid-high';
-            } else if (deficit <= -3.5) {
+            } else if (deficit <= -3.0) {
                 badgeBg = 'bg-blue-950/40 border-blue-500/30 text-blue-400';
                 scenarioTextKey = 'sc-medium';
-            } else if (deficit < -2.0) {
+            } else if (deficit < -1.5) {
                 badgeBg = 'bg-sky-950/40 border-sky-500/30 text-sky-400';
                 scenarioTextKey = 'sc-mid-low';
             } else if (deficit < 0) {
@@ -465,7 +453,6 @@
             badgeContainer.className = `p-4 rounded-xl border transition-all duration-300 flex flex-col gap-1 items-center justify-center text-center ${badgeBg}`;
             labelScenarioName.innerText = TRANSLATIONS[currentLang][scenarioTextKey];
 
-            // --- FORMATTAZIONE DATE DI BREACH ---
             const formatDate = (date) => {
                 if (date === 'already-breached') return TRANSLATIONS[currentLang]['already-breached'];
                 if (!date) return TRANSLATIONS[currentLang]['no-breach'];
@@ -475,13 +462,10 @@
             labelAlertDate.innerText = formatDate(alertDate);
             labelCriticalDate.innerText = formatDate(criticalDate);
 
-            // --- AGGIORNAMENTO GRAFICO ---
             updateChart(actualPoints, forecastPoints, alertThreshold, criticalThreshold);
         }
 
-        // --- STREAMING_CHUNK: Configurazione e rendering di Chart.js con Plugin Custom... -->
-        // Questo custom plugin disegna le linee di riferimento orizzontali in modo diretto sul canvas.
-        // Questo evita del tutto i bug legati ad 'hitRadius' ed elementi vuoti durante gli aggiornamenti dinamici.
+        // Plugin per tracciare le linee orizzontali di soglia
         const thresholdLinesPlugin = {
             id: 'thresholdLines',
             afterDraw(chart) {
@@ -520,12 +504,11 @@
             const ctx = document.getElementById('depletionChart').getContext('2d');
 
             if (myChart) {
-                // Aggiorna solo i due dataset reali interattivi
                 myChart.data.datasets[0].data = actuals;
                 myChart.data.datasets[1].data = forecast;
                 myChart.options.scales.y.min = Math.min(6.2, criticalVal - 0.2);
-                myChart.options.scales.y.max = selectReserveType.value === 'commercial' ? 8.0 : 8.4;
-                myChart.update('none'); // Disattiva le animazioni di transizione per evitare sfarfallii o glitch
+                myChart.options.scales.y.max = selectReserveType.value === 'commercial' ? 8.1 : 8.5;
+                myChart.update('none');
                 return;
             }
 
@@ -536,7 +519,7 @@
                         {
                             label: TRANSLATIONS[currentLang]['legend-actual'],
                             data: actuals,
-                            borderColor: '#3b82f6', // Blu reale per serie reale
+                            borderColor: '#3b82f6',
                             backgroundColor: '#3b82f6',
                             borderWidth: 3.5,
                             pointRadius: 4,
@@ -546,7 +529,7 @@
                         {
                             label: TRANSLATIONS[currentLang]['legend-forecast'],
                             data: forecast,
-                            borderColor: '#38bdf8', // Azzurro tratteggiato per proiezione
+                            borderColor: '#38bdf8',
                             backgroundColor: 'transparent',
                             borderWidth: 2.5,
                             borderDash: [6, 4],
@@ -565,7 +548,7 @@
                     },
                     plugins: {
                         legend: {
-                            display: false // Usiamo la leggenda HTML esterna
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
@@ -582,7 +565,7 @@
                             time: {
                                 unit: 'month',
                                 displayFormats: {
-                                    month: 'MMM yyyy' // RISOLVE RANGEERROR: Usa yyyy minuscolo
+                                    month: 'MMM yyyy'
                                 }
                             },
                             grid: {
@@ -594,7 +577,7 @@
                         },
                         y: {
                             min: 6.2,
-                            max: 8.0,
+                            max: 8.1,
                             grid: {
                                 color: '#1e293b'
                             },
@@ -604,12 +587,11 @@
                         }
                     }
                 },
-                plugins: [thresholdLinesPlugin] // Registrazione del plugin custom di sbarramento
+                plugins: [thresholdLinesPlugin]
             });
         }
 
-        // --- STREAMING_CHUNK: Gestione eventi, ascoltatori di input e sincronizzazione robusta... -->
-        // SINCRONIZZAZIONE INTELLIGENTE: Evita conflitti di digitazione per il segno meno "-" e per i decimali incompleti
+        // Listener Eventi
         inputDeficitSlider.addEventListener('input', (e) => {
             inputDeficitNumber.value = e.target.value;
             updateSimulation();
@@ -617,7 +599,6 @@
 
         inputDeficitNumber.addEventListener('input', (e) => {
             const rawVal = e.target.value;
-            // Se l'utente sta ancora digitando il segno meno, cancella l'input o scrive un punto, aspetta a validare
             if (rawVal === '-' || rawVal === '' || rawVal.endsWith('.')) {
                 return; 
             }
@@ -630,10 +611,9 @@
             }
         });
 
-        // Forza la normalizzazione dei limiti corretti solo al termine della digitazione (quando perde il focus)
         inputDeficitNumber.addEventListener('blur', (e) => {
             let val = parseFloat(e.target.value);
-            if (isNaN(val)) val = -3.8;
+            if (isNaN(val)) val = -3.5;
             if (val < -8.0) val = -8.0;
             if (val > 2.0) val = 2.0;
             e.target.value = val.toFixed(1);
@@ -641,7 +621,6 @@
             updateSimulation();
         });
 
-        // Gestione cambio tipo di riserva e ricalibrazione soglie automatiche
         selectReserveType.addEventListener('change', (e) => {
             const isComm = e.target.value === 'commercial';
             pReserveDesc.innerHTML = TRANSLATIONS[currentLang][isComm ? 'desc-commercial' : 'desc-global'];
@@ -659,14 +638,12 @@
         inputThresholdAlert.addEventListener('input', updateSimulation);
         inputThresholdCritical.addEventListener('input', updateSimulation);
 
-        // Bottone Reset
         btnReset.addEventListener('click', () => {
-            inputDeficitNumber.value = -3.8;
-            inputDeficitSlider.value = -3.8;
+            inputDeficitNumber.value = -3.5;
+            inputDeficitSlider.value = -3.5;
             updateSimulation();
         });
 
-        // Gestione Traduzione al click sulla bandierina
         btnLangToggle.addEventListener('click', () => {
             if (currentLang === 'it') {
                 currentLang = 'en';
@@ -679,7 +656,6 @@
             updateSimulation();
         });
 
-        // Inizializzazione della pagina su standard italiano
         window.onload = () => {
             applyTranslations();
             updateSimulation();
