@@ -45,22 +45,22 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                        <span data-i18n="app-title">Hormuz Crisis Simulator</span> 
-                        <span class="text-xs font-semibold px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-300">v2.6</span>
+                        <span data-i18n="app-title">Hormuz Crisis Simulator</span>
+                        <span class="text-xs font-semibold px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-300">v2.7</span>
                     </h1>
-                    <p class="text-xs text-slate-400" data-i18n="app-subtitle">Modello interattivo di svuotamento delle riserve petrolifere con serie storica reale fino a Giugno 2026</p>
+                    <p class="text-xs text-slate-400" data-i18n="app-subtitle">Modello interattivo con serie storica reale da Marzo al 30 Giugno 2026</p>
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-3">
                 <!-- Selettore Lingua Interattivo -->
                 <button id="langToggle" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-650 rounded-lg text-slate-200 transition-all font-semibold uppercase flex items-center gap-1.5">
                     <span id="langFlag">🇬🇧</span> <span id="langText">EN</span>
                 </button>
-                
+
                 <div class="flex items-center gap-2 text-xs bg-slate-800/40 border border-slate-700/50 px-3 py-1.5 rounded-lg text-slate-400">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span data-i18n="app-timeline">Scenario Marzo - Dicembre 2026</span>
+                    <span data-i18n="app-timeline">Scenario Marzo 2026 - Dicembre 2027</span>
                 </div>
             </div>
         </div>
@@ -69,24 +69,24 @@
     <!-- Contenitore Principale -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
+
             <!-- Colonna Sinistra: Parametri di Input e Controlli -->
             <section class="lg:col-span-4 space-y-6">
                 <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
                     <div class="border-b border-slate-800 pb-4">
                         <h2 class="text-lg font-semibold text-white" data-i18n="sidebar-title">Parametri di Simulazione</h2>
-                        <p class="text-xs text-slate-400" data-i18n="sidebar-subtitle">Modifica il deficit futuro per testare la tenuta del sistema partendo dall'ultimo dato reale di fine Giugno.</p>
+                        <p class="text-xs text-slate-400" data-i18n="sidebar-subtitle">Modifica il deficit futuro per testare la tenuta del sistema partendo dal dato reale di Giugno.</p>
                     </div>
 
-                    <!-- Selezione Tipo Riserve -->
+                    <!-- Serie Tracciata (unica, definizione IEA) -->
                     <div class="space-y-2">
-                        <label class="text-sm font-medium text-slate-300 block" data-i18n="label-reserve-type">Tipo di Riserva da Tracciare</label>
-                        <select id="reserveType" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                            <option value="commercial" selected data-i18n="opt-commercial">Scorte Commerciali a Terra (Consigliato, Fine Giu: 7.40B)</option>
-                            <option value="global" data-i18n="opt-global">Scorte Globali Osservate IEA (Fine Giu: 7.521B)</option>
-                        </select>
-                        <p class="text-[11px] text-slate-500 italic leading-relaxed" id="reserveDesc" data-i18n="desc-commercial">
-                            Mostra solo il petrolio stoccato nei serbatoi terrestri delle raffinerie. È la metrica corretta per calcolare il collasso fisico dei flussi (6.8B).
+                        <label class="text-sm font-medium text-slate-300 block" data-i18n="label-series">Serie Tracciata</label>
+                        <div class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-3">
+                            <p class="text-slate-100 text-sm font-semibold" data-i18n="series-name">Scorte Osservate Globali (IEA)</p>
+                            <p class="text-[11px] text-slate-500 font-mono mt-0.5" data-i18n="series-value">30 Giu 2026: 7.521 mld bbl</p>
+                        </div>
+                        <p class="text-[11px] text-slate-500 italic leading-relaxed" data-i18n="series-desc">
+                            "Global observed inventories" nella terminologia IEA: greggio, prodotti e NGL, a terra più in mare. A gennaio 2026 la composizione era OECD 50%, greggio cinese 15%, in mare 25%, resto altri non-OECD.
                         </p>
                     </div>
 
@@ -97,7 +97,7 @@
                             <input type="number" id="deficitNumber" step="0.1" min="-8.0" max="2.0" value="-3.5"
                                 class="w-20 bg-slate-950 border border-slate-800 rounded-lg py-1 px-2 text-center text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold">
                         </div>
-                        
+
                         <!-- Range Slider -->
                         <div class="relative pt-1">
                             <input type="range" id="deficitSlider" min="-8.0" max="2.0" step="0.1" value="-3.5"
@@ -114,13 +114,13 @@
                     <!-- Soglia Allerta e Soglia Critica -->
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <div class="space-y-1">
-                            <label for="thresholdAlert" class="text-xs text-slate-400 block" data-i18n="label-alert-threshold">Soglia Allerta (B)</label>
-                            <input type="number" id="thresholdAlert" step="0.05" min="6.0" max="8.0" value="7.00"
+                            <label for="thresholdAlert" class="text-xs text-slate-400 block" data-i18n="label-alert-threshold">Soglia Allerta (mld)</label>
+                            <input type="number" id="thresholdAlert" step="0.05" min="5.0" max="8.5" value="7.00"
                                 class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-2 text-center text-amber-500 font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500">
                         </div>
                         <div class="space-y-1">
-                            <label for="thresholdCritical" class="text-xs text-slate-400 block" data-i18n="label-crit-threshold">Soglia Critica (B)</label>
-                            <input type="number" id="thresholdCritical" step="0.05" min="6.0" max="8.0" value="6.80"
+                            <label for="thresholdCritical" class="text-xs text-slate-400 block" data-i18n="label-crit-threshold">Soglia Critica (mld)</label>
+                            <input type="number" id="thresholdCritical" step="0.05" min="5.0" max="8.5" value="6.80"
                                 class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-2 text-center text-rose-500 font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-rose-500">
                         </div>
                     </div>
@@ -156,7 +156,7 @@
 
                     <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between gap-4">
                         <div class="space-y-1">
-                            <span class="text-xs font-semibold text-rose-500 uppercase tracking-wider" data-i18n="critical-title">Limite Critico Fisico</span>
+                            <span class="text-xs font-semibold text-rose-500 uppercase tracking-wider" data-i18n="critical-title">Soglia Critica</span>
                             <p id="criticalDateText" class="text-2xl font-bold text-white tracking-tight">-</p>
                         </div>
                         <div class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400">
@@ -210,7 +210,15 @@
                         <span data-i18n="info-box-title">Nota Metodologica, Report IEA e Variabile Cina</span>
                     </h3>
                     <p class="text-xs text-slate-300 leading-relaxed" id="analyticalContent" data-i18n="info-box-body">
-                        Il report IEA di Luglio indica un rimbalzo artificiale delle scorte globali a fine Giugno (7.521B), dovuto unicamente all'aumento del petrolio galleggiante in navigazione (+117mb). Le scorte commerciali a terra sono diminuite di 96mb, con la Cina che ha attinto 37mb dai propri serbatoi. Se la Cina dovesse arrestare i prelievi SPR e rientrare come acquirente attivo per ripristinare le scorte, il deficit netto globale aumenterebbe di circa 1.2-1.5 mb/giorno, accelerando il raggiungimento della soglia di blocco degli oleodotti (6.8B) già entro il tardo autunno 2026.
+                        Il report IEA di Luglio colloca le scorte osservate globali a 7.521 mld a fine Giugno. Il totale è sostenuto dal petrolio in mare (+117 mb nel mese), mentre le scorte a terra sono calate di 96 mb, di cui 44 mb dalle riserve governative OECD; la Cina ha attinto 37 mb dai propri serbatoi. Se la Cina arrestasse i prelievi e rientrasse come acquirente per ricostituire le scorte, il deficit netto globale si allargherebbe di circa 1.2-1.5 mb/giorno, anticipando il raggiungimento della soglia critica. Nota: "oil on water" non coincide con il floating storage, perché include anche i carichi in normale navigazione.
+                    </p>
+                </div>
+
+                <!-- Avvertenza sulla soglia critica -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2" data-i18n="caveat-title">Limite del modello</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed" data-i18n="caveat-body">
+                        Le soglie sono parametri dell'utente, non livelli pubblicati dall'IEA. Il modello applica un deficit costante e non tiene conto della risposta di prezzo, dei rilasci coordinati di riserve strategiche né della distruzione di domanda, tutti fattori che nella realtà rallentano lo svuotamento all'avvicinarsi delle soglie.
                     </p>
                 </div>
             </section>
@@ -221,7 +229,7 @@
     <footer class="border-t border-slate-800 bg-slate-950 py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-4">
             <p class="text-xs text-slate-500">
-                &copy; 2026 Hormuz Strait Monitor Project. Tutti i diritti riservati.
+                &copy; 2026 Hormuz Crisis Simulator. Tutti i diritti riservati.
             </p>
             <p class="text-xs text-slate-500 flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> <span data-i18n="footer-status">Dati aggiornati al 30 Giugno 2026 (Report IEA Luglio 2026)</span>
@@ -235,21 +243,20 @@
             it: {
                 "app-title": "Hormuz Crisis Simulator",
                 "app-subtitle": "Modello interattivo con serie storica reale da Marzo al 30 Giugno 2026",
-                "app-timeline": "Scenario Marzo - Dicembre 2026",
+                "app-timeline": "Scenario Marzo 2026 - Dicembre 2027",
                 "sidebar-title": "Parametri di Simulazione",
                 "sidebar-subtitle": "Modifica il deficit futuro per testare la tenuta del sistema partendo dal dato reale di Giugno.",
-                "label-reserve-type": "Tipo di Riserva da Tracciare",
-                "opt-commercial": "Scorte Commerciali a Terra (Consigliato, Fine Giu: 7.40B)",
-                "opt-global": "Scorte Globali Osservate IEA (Fine Giu: 7.521B)",
-                "desc-commercial": "Mostra solo il petrolio stoccato nei serbatoi terrestri delle raffinerie. È la metrica corretta per calcolare il collasso fisico dei flussi (6.8B).",
-                "desc-global": "Include anche le riserve strategiche governative e il petrolio in navigazione (Oil on Water). Il dato di fine giugno ha registrato +117mb in mare ma -96mb a terra.",
+                "label-series": "Serie Tracciata",
+                "series-name": "Scorte Osservate Globali (IEA)",
+                "series-value": "30 Giu 2026: 7.521 mld bbl",
+                "series-desc": "\"Global observed inventories\" nella terminologia IEA: greggio, prodotti e NGL, a terra più in mare. A gennaio 2026 la composizione era OECD 50%, greggio cinese 15%, in mare 25%, resto altri non-OECD.",
                 "label-deficit": "Deficit Giornaliero (Milioni b/g)",
-                "label-alert-threshold": "Soglia Allerta (B)",
-                "label-crit-threshold": "Soglia Critica (B)",
+                "label-alert-threshold": "Soglia Allerta (mld)",
+                "label-crit-threshold": "Soglia Critica (mld)",
                 "label-classification": "Classificazione Scenario Future",
                 "btn-reset": "Ripristina Base (-3.5 mb/d)",
                 "alert-title": "Superamento Allerta",
-                "critical-title": "Limite Critico Fisico",
+                "critical-title": "Soglia Critica",
                 "chart-title": "Curva di Svuotamento delle Scorte",
                 "chart-subtitle": "Serie storica reale fino a Giugno (linea continua) e proiezione dal 1° Luglio (linea tratteggiata)",
                 "legend-actual": "Reale (Storico fino al 30 Giu)",
@@ -257,7 +264,9 @@
                 "legend-alert": "Allerta",
                 "legend-critical": "Critico",
                 "info-box-title": "Nota Metodologica, Report IEA e Variabile Cina",
-                "info-box-body": "Il report IEA di Luglio indica un rimbalzo artificiale delle scorte globali a fine Giugno (7.521B), dovuto unicamente all'aumento del petrolio galleggiante in navigazione (+117mb). Le scorte commerciali a terra sono diminuite di 96mb, con la Cina che ha attinto 37mb dai propri serbatoi. Se la Cina dovesse arrestare i prelievi SPR e rientrare come acquirente attivo per ripristinare le scorte, il deficit netto globale aumenterebbe di circa 1.2-1.5 mb/giorno, accelerando il raggiungimento della soglia di blocco degli oleodotti (6.8B) già entro il tardo autunno 2026.",
+                "info-box-body": "Il report IEA di Luglio colloca le scorte osservate globali a 7.521 mld a fine Giugno. Il totale è sostenuto dal petrolio in mare (+117 mb nel mese), mentre le scorte a terra sono calate di 96 mb, di cui 44 mb dalle riserve governative OECD; la Cina ha attinto 37 mb dai propri serbatoi. Se la Cina arrestasse i prelievi e rientrasse come acquirente per ricostituire le scorte, il deficit netto globale si allargherebbe di circa 1.2-1.5 mb/giorno, anticipando il raggiungimento della soglia critica. Nota: \"oil on water\" non coincide con il floating storage, perché include anche i carichi in normale navigazione.",
+                "caveat-title": "Limite del modello",
+                "caveat-body": "Le soglie sono parametri dell'utente, non livelli pubblicati dall'IEA. Il modello applica un deficit costante e non tiene conto della risposta di prezzo, dei rilasci coordinati di riserve strategiche né della distruzione di domanda, tutti fattori che nella realtà rallentano lo svuotamento all'avvicinarsi delle soglie.",
                 "footer-status": "Dati aggiornati al 30 Giugno 2026 (Report IEA Luglio 2026)",
                 "sc-doomsday": "Doomsday (Collasso Immediato)",
                 "sc-pessimistic": "Scenario Altamente Pessimista",
@@ -266,27 +275,26 @@
                 "sc-mid-low": "Scenario Blocco Parziale (-2.0 mb/d)",
                 "sc-optimistic": "Scenario Ottimistico",
                 "sc-recovery": "Scenario di Ripresa / Accumulo",
-                "no-breach": "Nessun superamento nel 2026",
+                "no-breach": "Nessun superamento entro il 2027",
                 "already-breached": "Già superato nei dati storici"
             },
             en: {
                 "app-title": "Hormuz Crisis Simulator",
                 "app-subtitle": "Interactive depletion model with real historical data from March to June 30, 2026",
-                "app-timeline": "Scenario March - December 2026",
+                "app-timeline": "Scenario March 2026 - December 2027",
                 "sidebar-title": "Simulation Parameters",
                 "sidebar-subtitle": "Modify future deficit to test system resilience starting from June actuals.",
-                "label-reserve-type": "Inventory Metric to Track",
-                "opt-commercial": "Commercial Land Inventories (Recommended, End-June: 7.40B)",
-                "opt-global": "IEA Observed Global Stocks (End-June: 7.521B)",
-                "desc-commercial": "Displays only physical oil stored in land tanks at refineries. Correct metric for physical line blockage (6.8B).",
-                "desc-global": "Includes strategic government reserves and oil on water. June data logged +117mb floating but -96mb land drawdowns.",
+                "label-series": "Tracked Series",
+                "series-name": "Global Observed Inventories (IEA)",
+                "series-value": "30 Jun 2026: 7.521 bn bbl",
+                "series-desc": "The IEA's own term: crude, products and NGLs, on land plus oil on water. In January 2026 the split was OECD 50%, Chinese crude 15%, oil on water 25%, the rest other non-OECD.",
                 "label-deficit": "Daily Deficit (Million b/d)",
-                "label-alert-threshold": "Alert Threshold (B)",
-                "label-crit-threshold": "Critical Threshold (B)",
+                "label-alert-threshold": "Alert Threshold (bn)",
+                "label-crit-threshold": "Critical Threshold (bn)",
                 "label-classification": "Future Scenario Classification",
                 "btn-reset": "Reset to Baseline (-3.5 mb/d)",
                 "alert-title": "Alert Breach",
-                "critical-title": "Physical Critical Limit",
+                "critical-title": "Critical Threshold",
                 "chart-title": "Inventory Depletion Trajectory",
                 "chart-subtitle": "Real historical series to June (solid line) and projection from July 1 (dashed line)",
                 "legend-actual": "Actual (Historical to June 30)",
@@ -294,7 +302,9 @@
                 "legend-alert": "Alert",
                 "legend-critical": "Critical",
                 "info-box-title": "Methodological Note, IEA Report & China Factor",
-                "info-box-body": "The July IEA OMR report shows an artificial bounce in total global stocks at end-June (7.521B), driven purely by floating oil on water (+117mb). Land stocks dropped by 96mb, with China drawing 37mb from domestic tanks. If China halts SPR draws and returns as an active buyer to restock, the global deficit will widen by another 1.2-1.5 mb/d, bringing forward the pipeline disruption threshold (6.8B) to late autumn 2026.",
+                "info-box-body": "The July IEA OMR puts global observed inventories at 7.521 bn at end-June. The total is held up by oil on water (+117 mb on the month), while on-land stocks fell by 96 mb, of which 44 mb came from OECD government reserves; China drew 37 mb from its own tanks. If China halts draws and returns as a buyer to restock, the global deficit widens by roughly 1.2-1.5 mb/d, bringing the critical threshold forward. Note: oil on water is not the same as floating storage, since it also covers cargoes in normal transit.",
+                "caveat-title": "Model limitation",
+                "caveat-body": "The thresholds are user parameters, not levels published by the IEA. The model applies a constant deficit and ignores price response, coordinated strategic reserve releases and demand destruction, all of which slow depletion in reality as the thresholds approach.",
                 "footer-status": "Data feed updated to June 30, 2026 (IEA July 2026 Report)",
                 "sc-doomsday": "Doomsday (Immediate Collapse)",
                 "sc-pessimistic": "Highly Pessimistic Scenario",
@@ -303,41 +313,29 @@
                 "sc-mid-low": "Partial Blockade Scenario (-2.0 mb/d)",
                 "sc-optimistic": "Optimistic Scenario",
                 "sc-recovery": "Recovery / Re-stocking Scenario",
-                "no-breach": "No breach detected in 2026",
+                "no-breach": "No breach detected through 2027",
                 "already-breached": "Already breached in historical data"
             }
         };
 
         let currentLang = 'it';
 
-        // Serie Storica Reale 1: Scorte Commerciali a Terra (HFI / EIA basis)
-        // Mantiene tutta la storia da Marzo al 30 Giugno
-        const ACTUALS_COMMERCIAL = [
-            { x: new Date(2026, 2, 1), y: 7.85 },   // 1 Marzo
-            { x: new Date(2026, 3, 1), y: 7.76 },   // 1 Aprile
-            { x: new Date(2026, 4, 1), y: 7.64 },   // 1 Maggio
-            { x: new Date(2026, 5, 1), y: 7.50 },   // 1 Giugno
-            { x: new Date(2026, 5, 30), y: 7.40 }   // 30 Giugno (Dato IEA Land-based: -96mb prelievo terra)
-        ];
-
-        // Serie Storica Reale 2: Scorte Globali Osservate IEA (Inclusi SPR e Oil on Water)
-        // Mantiene tutta la storia da Marzo al 30 Giugno
+        // Serie Storica Reale: Scorte Osservate Globali IEA ("global observed inventories")
+        // Comprende scorte a terra (industria + governative + non-OECD) e petrolio in mare.
         const ACTUALS_GLOBAL = [
             { x: new Date(2026, 2, 1), y: 8.20 },   // 1 Marzo
             { x: new Date(2026, 3, 1), y: 8.07 },   // 1 Aprile
             { x: new Date(2026, 4, 1), y: 7.95 },   // 1 Maggio
             { x: new Date(2026, 5, 1), y: 7.81 },   // 1 Giugno
-            { x: new Date(2026, 5, 30), y: 7.521 }  // 30 Giugno (Dato IEA OMR Luglio 2026)
+            { x: new Date(2026, 5, 30), y: 7.521 }  // 30 Giugno (IEA OMR Luglio 2026)
         ];
 
         // --- ACQUISIZIONE ELEMENTI DOM ---
         const inputDeficitNumber = document.getElementById('deficitNumber');
         const inputDeficitSlider = document.getElementById('deficitSlider');
-        const selectReserveType = document.getElementById('reserveType');
-        const pReserveDesc = document.getElementById('reserveDesc');
         const inputThresholdAlert = document.getElementById('thresholdAlert');
         const inputThresholdCritical = document.getElementById('thresholdCritical');
-        
+
         const badgeContainer = document.getElementById('scenarioBadgeContainer');
         const labelScenarioName = document.getElementById('scenarioName');
         const labelAlertDate = document.getElementById('alertDateText');
@@ -361,9 +359,6 @@
                 }
             });
 
-            const isComm = selectReserveType.value === 'commercial';
-            pReserveDesc.innerHTML = TRANSLATIONS[currentLang][isComm ? 'desc-commercial' : 'desc-global'];
-
             if (myChart) {
                 myChart.data.datasets[0].label = TRANSLATIONS[currentLang]['legend-actual'];
                 myChart.data.datasets[1].label = TRANSLATIONS[currentLang]['legend-forecast'];
@@ -375,9 +370,8 @@
             const deficit = parseFloat(inputDeficitNumber.value) || -3.5;
             const alertThreshold = parseFloat(inputThresholdAlert.value) || 7.00;
             const criticalThreshold = parseFloat(inputThresholdCritical.value) || 6.80;
-            const reserveType = selectReserveType.value;
 
-            const historicalData = reserveType === 'commercial' ? ACTUALS_COMMERCIAL : ACTUALS_GLOBAL;
+            const historicalData = ACTUALS_GLOBAL;
             const lastHistoricalPoint = historicalData[historicalData.length - 1]; // 30 Giugno 2026
             const startForecastDate = new Date(lastHistoricalPoint.x);
 
@@ -386,10 +380,10 @@
                 y: pt.y
             }));
 
-            // Generazione proiezione futura dal 1° Luglio al 31 Dicembre 2026
+            // Proiezione futura dal 1° Luglio 2026 al 31 Dicembre 2027
             const forecastPoints = [{ x: lastHistoricalPoint.x, y: lastHistoricalPoint.y }];
-            const endSimulationDate = new Date(2026, 11, 31);
-            
+            const endSimulationDate = new Date(2027, 11, 31);
+
             let currentDate = new Date(startForecastDate);
             currentDate.setDate(currentDate.getDate() + 1); // 1° Luglio 2026
 
@@ -408,7 +402,7 @@
             let currentReserves = lastHistoricalPoint.y;
 
             while (currentDate <= endSimulationDate) {
-                const dailyDraw = (deficit * 1000000) / 1000000000;
+                const dailyDraw = deficit / 1000; // mb/g -> miliardi di barili al giorno
                 currentReserves = Math.max(0, currentReserves + dailyDraw);
 
                 forecastPoints.push({
@@ -502,18 +496,19 @@
 
         function updateChart(actuals, forecast, alertVal, criticalVal) {
             const ctx = document.getElementById('depletionChart').getContext('2d');
+            const yMin = Math.min(5.0, criticalVal - 0.2);
 
             if (myChart) {
                 myChart.data.datasets[0].data = actuals;
                 myChart.data.datasets[1].data = forecast;
-                myChart.options.scales.y.min = Math.min(6.2, criticalVal - 0.2);
-                myChart.options.scales.y.max = selectReserveType.value === 'commercial' ? 8.1 : 8.5;
+                myChart.options.scales.y.min = yMin;
+                myChart.options.scales.y.max = 8.5;
                 myChart.update('none');
                 return;
             }
 
             myChart = new Chart(ctx, {
-                type: 'line', 
+                type: 'line',
                 data: {
                     datasets: [
                         {
@@ -553,8 +548,9 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const date = new Date(context.parsed.x).toLocaleDateString(currentLang === 'it' ? 'it-IT' : 'en-US', { day: 'numeric', month: 'short' });
-                                    return `${date}: ${context.parsed.y} Billion Barrels`;
+                                    const date = new Date(context.parsed.x).toLocaleDateString(currentLang === 'it' ? 'it-IT' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                                    const unit = currentLang === 'it' ? 'mld barili' : 'billion barrels';
+                                    return `${date}: ${context.parsed.y} ${unit}`;
                                 }
                             }
                         }
@@ -565,19 +561,21 @@
                             time: {
                                 unit: 'month',
                                 displayFormats: {
-                                    month: 'MMM yyyy'
+                                    month: 'MMM yy'
                                 }
                             },
                             grid: {
                                 color: '#1e293b'
                             },
                             ticks: {
-                                color: '#94a3b8'
+                                color: '#94a3b8',
+                                maxRotation: 45,
+                                autoSkip: true
                             }
                         },
                         y: {
-                            min: 6.2,
-                            max: 8.1,
+                            min: yMin,
+                            max: 8.5,
                             grid: {
                                 color: '#1e293b'
                             },
@@ -600,7 +598,7 @@
         inputDeficitNumber.addEventListener('input', (e) => {
             const rawVal = e.target.value;
             if (rawVal === '-' || rawVal === '' || rawVal.endsWith('.')) {
-                return; 
+                return;
             }
             let val = parseFloat(rawVal);
             if (!isNaN(val)) {
@@ -621,20 +619,6 @@
             updateSimulation();
         });
 
-        selectReserveType.addEventListener('change', (e) => {
-            const isComm = e.target.value === 'commercial';
-            pReserveDesc.innerHTML = TRANSLATIONS[currentLang][isComm ? 'desc-commercial' : 'desc-global'];
-            
-            if (isComm) {
-                inputThresholdAlert.value = "7.00";
-                inputThresholdCritical.value = "6.80";
-            } else {
-                inputThresholdAlert.value = "7.30";
-                inputThresholdCritical.value = "7.10";
-            }
-            updateSimulation();
-        });
-
         inputThresholdAlert.addEventListener('input', updateSimulation);
         inputThresholdCritical.addEventListener('input', updateSimulation);
 
@@ -645,13 +629,10 @@
         });
 
         btnLangToggle.addEventListener('click', () => {
-            if (currentLang === 'it') {
-                currentLang = 'en';
-                btnLangToggle.innerHTML = `🇮🇹 <span id="langText">IT</span>`;
-            } else {
-                currentLang = 'it';
-                btnLangToggle.innerHTML = `🇬🇧 <span id="langText">EN</span>`;
-            }
+            currentLang = (currentLang === 'it') ? 'en' : 'it';
+            document.getElementById('langFlag').innerText = (currentLang === 'it') ? '🇬🇧' : '🇮🇹';
+            document.getElementById('langText').innerText = (currentLang === 'it') ? 'EN' : 'IT';
+            document.documentElement.lang = currentLang;
             applyTranslations();
             updateSimulation();
         });
