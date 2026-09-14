@@ -1,395 +1,527 @@
 <!DOCTYPE html>
 <html lang="it" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hormuz Gas Predictor & Storage Simulator v2.6</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predittore Stoccaggi Gas v2.7</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #0f172a; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  :focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-full flex flex-col justify-between">
 
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-emerald-600/15 rounded-lg border border-emerald-500/30 text-emerald-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                        <span class="lang-it">Predittore Stoccaggi Gas Avanzato</span> 
-                        <span class="lang-en hidden">Advanced Natural Gas Storage Predictor</span> 
-                        <span class="text-xs font-semibold px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-300">v2.6</span>
-                    </h1>
-                </div>
+<header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-30">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div class="flex items-center gap-3">
+      <div class="p-2 bg-emerald-600/15 rounded-lg border border-emerald-500/30 text-emerald-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          <span class="lang-it">Predittore Stoccaggi Gas Avanzato</span>
+          <span class="lang-en hidden">Advanced Natural Gas Storage Predictor</span>
+          <span class="text-xs font-semibold px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-300">v2.7</span>
+        </h1>
+      </div>
+    </div>
+    <button id="langToggleBtn" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold uppercase">
+      🇬🇧 Switch to English
+    </button>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+  <section class="lg:col-span-4 space-y-6">
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
+
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block lang-it">Finestra mobile di Baseline</label>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block lang-en hidden">Dynamic Baseline Window</label>
+        <div class="grid grid-cols-3 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button onclick="changeWindow('15')" id="btnWin15" class="py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white">15 Giorni</button>
+          <button onclick="changeWindow('30')" id="btnWin30" class="py-1.5 text-xs font-semibold rounded-lg transition-all bg-slate-800 text-white border border-slate-700">30 Giorni</button>
+          <button onclick="changeWindow('60')" id="btnWin60" class="py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white">60 Giorni</button>
+        </div>
+      </div>
+
+      <div class="bg-slate-950/60 p-4 border border-slate-800 rounded-xl space-y-3">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-bold text-slate-300 block lang-it">Tassi autunnali separati</span>
+            <span class="text-xs font-bold text-slate-300 block lang-en hidden">Separate autumn rates</span>
+            <span class="text-[10px] text-slate-500 block lang-it">Disattivo: la proiezione usa il tasso estivo per tutto il periodo</span>
+            <span class="text-[10px] text-slate-500 block lang-en hidden font-light">Off: the projection uses the summer rate throughout</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" id="seasonalToggle" class="sr-only peer">
+            <div class="w-9 h-5 bg-slate-800 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 peer-checked:after:bg-white"></div>
+          </label>
+        </div>
+
+        <div id="seasonalParamsBox" class="hidden pt-3 border-t border-slate-900 space-y-3">
+
+          <div class="space-y-1.5">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider lang-it">Scenari storici Germania</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider lang-en hidden">German historical presets</div>
+            <div class="grid grid-cols-3 gap-1.5">
+              <button onclick="applyPreset('p2021')" class="preset-btn py-1.5 px-1 text-[10px] font-semibold rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:border-emerald-600 hover:text-white transition-all">
+                2021<span class="block text-[9px] font-normal text-slate-500">.295 .146 −.25</span>
+              </button>
+              <button onclick="applyPreset('base')" class="preset-btn py-1.5 px-1 text-[10px] font-semibold rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:border-emerald-600 hover:text-white transition-all">
+                Base<span class="block text-[9px] font-normal text-slate-500">.205 .100 −.25</span>
+              </button>
+              <button onclick="applyPreset('p2025')" class="preset-btn py-1.5 px-1 text-[10px] font-semibold rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:border-emerald-600 hover:text-white transition-all">
+                2025<span class="block text-[9px] font-normal text-slate-500">.200 −.045 −.26</span>
+              </button>
             </div>
-            <button id="langToggleBtn" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold uppercase">
-                🇬🇧 Switch to English
-            </button>
+            <p class="text-[9.5px] text-slate-500 leading-snug lang-it">
+              Ordine: settembre, ottobre, novembre. 2021 è l'unico anno confrontabile per livello di partenza. 2022 (+0,251 / +0,236) è escluso: acquisti pubblici d'emergenza, non un mercato. 2020, 2023 e 2024 sono esclusi perché già saturi al 93–96%.
+            </p>
+            <p class="text-[9.5px] text-slate-500 leading-snug lang-en hidden">
+              Order: September, October, November. 2021 is the only year comparable by starting level. 2022 (+0.251 / +0.236) is excluded: emergency state procurement, not a market. 2020, 2023 and 2024 are excluded because they were already saturated at 93–96%.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-xs pt-1">
+            <div class="space-y-2">
+              <span class="block text-[11px] text-slate-400 font-semibold border-b border-slate-900 pb-0.5">Settembre</span>
+              <label class="text-[10px] text-slate-500 block">EU: <input type="number" id="inputSeptEU" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-emerald-400 font-mono font-bold mt-0.5"></label>
+              <label class="text-[10px] text-slate-500 block">DE: <input type="number" id="inputSeptDE" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-amber-400 font-mono font-bold mt-0.5"></label>
+              <label class="text-[10px] text-slate-500 block">IT: <input type="number" id="inputSeptIT" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-blue-400 font-mono font-bold mt-0.5"></label>
+            </div>
+            <div class="space-y-2">
+              <span class="block text-[11px] text-slate-400 font-semibold border-b border-slate-900 pb-0.5">Ottobre</span>
+              <label class="text-[10px] text-slate-500 block">EU: <input type="number" id="inputOctEU" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-emerald-400 font-mono font-bold mt-0.5"></label>
+              <label class="text-[10px] text-slate-500 block">DE: <input type="number" id="inputOctDE" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-amber-400 font-mono font-bold mt-0.5"></label>
+              <label class="text-[10px] text-slate-500 block">IT: <input type="number" id="inputOctIT" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-blue-400 font-mono font-bold mt-0.5"></label>
+            </div>
+            <div class="space-y-2">
+              <span class="block text-[11px] text-slate-400 font-semibold border-b border-slate-900 pb-0.5">Novembre</span>
+              <label class="text-[10px] text-slate-500 block">EU: <input type="number" id="inputNovEU" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-emerald-400 font-mono font-bold mt-0.5"></label>
+              <label class="text-[10px] text-slate-500 block">DE: <input type="number" id="inputNovDE" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-amber-400 font-mono font-bold mt-0.5"></label>
+              <label class="text-[10px] text-slate-500 block">IT: <input type="number" id="inputNovIT" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-blue-400 font-mono font-bold mt-0.5"></label>
+            </div>
+          </div>
+
+          <button onclick="resetSeasonalInputsToDefault(); updateSim();" class="w-full py-1 text-[10px] font-semibold text-slate-400 hover:text-white border border-slate-800 rounded-lg transition-all">
+            <span class="lang-it">Ripristina medie storiche</span><span class="lang-en hidden">Reset to historical averages</span>
+          </button>
         </div>
-    </header>
+      </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            <section class="lg:col-span-4 space-y-6">
-                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
-                    
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block lang-it">Finestra mobile di Baseline</label>
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block lang-en hidden">Dynamic Baseline Window</label>
-                        <div class="grid grid-cols-3 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                            <button onclick="changeWindow('15')" id="btnWin15" class="py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white">15 Giorni</button>
-                            <button onclick="changeWindow('30')" id="btnWin30" class="py-1.5 text-xs font-semibold rounded-lg transition-all bg-slate-800 text-white border border-slate-700">30 Giorni</button>
-                            <button onclick="changeWindow('60')" id="btnWin60" class="py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white">60 Giorni</button>
-                        </div>
-                    </div>
+      <div class="border-b border-slate-800 pb-1">
+        <h2 class="text-xs font-bold text-white uppercase tracking-wider lang-it">Tassi Lineari Estivi (Correnti)</h2>
+        <h2 class="text-xs font-bold text-white uppercase tracking-wider lang-en hidden">Current Summer Linear Rates</h2>
+      </div>
 
-                    <div class="bg-slate-950/60 p-4 border border-slate-800 rounded-xl space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-xs font-bold text-slate-300 block lang-it">Aggiustamento Stagionale (Autunno)</span>
-                                <span class="text-xs font-bold text-slate-300 block lang-en hidden">Seasonal Autumn Adjustment</span>
-                                <span class="text-[10px] text-slate-500 block lang-it">Attiva i trend storici reali per Settembre/Ottobre</span>
-                                <span class="text-[10px] text-slate-500 block lang-en hidden font-light">Enables real historical trends for Sept/Oct</span>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="seasonalToggle" class="sr-only peer" checked>
-                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 peer-checked:after:bg-white"></div>
-                            </label>
-                        </div>
-
-                        <div id="seasonalParamsBox" class="pt-3 border-t border-slate-900 space-y-3">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider lang-it">Modifica Target Autunnali (% / giorno)</div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider lang-en hidden">Override Autumn Rates (% / day)</div>
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div class="space-y-2">
-                                    <span class="block text-[11px] text-slate-400 font-semibold border-b border-slate-900 pb-0.5">Settembre</span>
-                                    <label class="text-[10px] text-slate-500 block">EU: <input type="number" id="inputSeptEU" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-emerald-400 font-mono font-bold mt-0.5"></label>
-                                    <label class="text-[10px] text-slate-500 block">DE: <input type="number" id="inputSeptDE" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-amber-400 font-mono font-bold mt-0.5"></label>
-                                    <label class="text-[10px] text-slate-500 block">IT: <input type="number" id="inputSeptIT" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-blue-400 font-mono font-bold mt-0.5"></label>
-                                </div>
-                                <div class="space-y-2">
-                                    <span class="block text-[11px] text-slate-400 font-semibold border-b border-slate-900 pb-0.5">Ottobre</span>
-                                    <label class="text-[10px] text-slate-500 block">EU: <input type="number" id="inputOctEU" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-emerald-400 font-mono font-bold mt-0.5"></label>
-                                    <label class="text-[10px] text-slate-500 block">DE: <input type="number" id="inputOctDE" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-amber-400 font-mono font-bold mt-0.5"></label>
-                                    <label class="text-[10px] text-slate-500 block">IT: <input type="number" id="inputOctIT" step="0.01" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-blue-400 font-mono font-bold mt-0.5"></label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="border-b border-slate-800 pb-1">
-                        <h2 class="text-xs font-bold text-white uppercase tracking-wider lang-it">Tassi Lineari Estivi (Correnti)</h2>
-                        <h2 class="text-xs font-bold text-white uppercase tracking-wider lang-en hidden">Current Summer Linear Rates</h2>
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="font-medium text-slate-300 text-xs flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Europa (EU)
-                            </span>
-                            <span id="valEU" class="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/45 px-2 py-0.5 rounded border border-emerald-500/20">0.00%</span>
-                        </div>
-                        <input type="range" id="rateEU" min="-1.0" max="1.0" step="0.01" class="w-full h-1.5 bg-slate-950 rounded-lg cursor-pointer accent-emerald-500">
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="font-medium text-slate-300 text-xs flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-amber-400"></span> Germania (DE)
-                            </span>
-                            <span id="valDE" class="font-mono text-xs font-bold text-amber-400 bg-amber-950/45 px-2 py-0.5 rounded border border-amber-500/20">0.00%</span>
-                        </div>
-                        <input type="range" id="rateDE" min="-1.0" max="1.0" step="0.01" class="w-full h-1.5 bg-slate-950 rounded-lg cursor-pointer accent-amber-500">
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="font-medium text-slate-300 text-xs flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-blue-400"></span> Italia (IT)
-                            </span>
-                            <span id="valIT" class="font-mono text-xs font-bold text-blue-400 bg-blue-950/45 px-2 py-0.5 rounded border border-blue-500/20">0.00%</span>
-                        </div>
-                        <input type="range" id="rateIT" min="-1.0" max="1.0" step="0.01" class="w-full h-1.5 bg-slate-950 rounded-lg cursor-pointer accent-blue-500">
-                    </div>
-
-                    <div class="p-4 bg-slate-950/50 border border-slate-800 rounded-xl space-y-2">
-                        <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-it">Livelli previsti al 1 Novembre</div>
-                        <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-en hidden">Predicted Inventory on Nov 1</div>
-                        <div class="flex justify-between items-center border-b border-slate-900 pb-1">
-                            <span class="text-xs text-slate-400">Europa (EU):</span>
-                            <span class="text-lg font-bold font-mono" id="predEUText">-%</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-slate-900 pb-1">
-                            <span class="text-xs text-slate-400">Germania (DE):</span>
-                            <span class="text-lg font-bold font-mono" id="predDEText">-%</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-400">Italia (IT):</span>
-                            <span class="text-lg font-bold font-mono" id="predITText">-%</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="lg:col-span-8 space-y-6">
-                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-                    <div class="mb-4">
-                        <h2 class="text-lg font-semibold text-white lang-it">Traiettoria e Simulazione Stoccaggi Gas</h2>
-                        <h2 class="text-lg font-semibold text-white lang-en hidden">Gas Storage Trajectory & Simulation</h2>
-                    </div>
-                    <div class="relative h-[500px] w-full bg-slate-950/40 rounded-xl p-2 border border-slate-800/50">
-                        <canvas id="storageChart"></canvas>
-                    </div>
-                </div>
-            </section>
+      <div class="space-y-1">
+        <div class="flex justify-between items-center text-sm">
+          <span class="font-medium text-slate-300 text-xs flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Europa (EU)</span>
+          <span id="valEU" class="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/45 px-2 py-0.5 rounded border border-emerald-500/20">0.00%</span>
         </div>
-    </main>
+        <input type="range" id="rateEU" min="-1.0" max="1.0" step="0.01" class="w-full h-1.5 bg-slate-950 rounded-lg cursor-pointer accent-emerald-500">
+      </div>
 
-    <footer class="border-t border-slate-800 bg-slate-950 py-4 text-center text-xs text-slate-500">
-        <p>&copy; 2026 Hormuz Strait Gas Monitor. Data source: GIE AGSI Platform. <span id="lastUpdateTextIT"></span></p>
-    </footer>
+      <div class="space-y-1">
+        <div class="flex justify-between items-center text-sm">
+          <span class="font-medium text-slate-300 text-xs flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Germania (DE)</span>
+          <span id="valDE" class="font-mono text-xs font-bold text-amber-400 bg-amber-950/45 px-2 py-0.5 rounded border border-amber-500/20">0.00%</span>
+        </div>
+        <input type="range" id="rateDE" min="-1.0" max="1.0" step="0.01" class="w-full h-1.5 bg-slate-950 rounded-lg cursor-pointer accent-amber-500">
+      </div>
 
-    <script>
-        let datesLabels = [];
-        let euHist = []; let deHist = []; let itHist = [];
-        let histLength = 0; let ratesData = {};
-        let selectedWindow = '30';
+      <div class="space-y-1">
+        <div class="flex justify-between items-center text-sm">
+          <span class="font-medium text-slate-300 text-xs flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-400"></span> Italia (IT)</span>
+          <span id="valIT" class="font-mono text-xs font-bold text-blue-400 bg-blue-950/45 px-2 py-0.5 rounded border border-blue-500/20">0.00%</span>
+        </div>
+        <input type="range" id="rateIT" min="-1.0" max="1.0" step="0.01" class="w-full h-1.5 bg-slate-950 rounded-lg cursor-pointer accent-blue-500">
+      </div>
 
-        const sliderEU = document.getElementById('rateEU');
-        const sliderDE = document.getElementById('rateDE');
-        const sliderIT = document.getElementById('rateIT');
+      <div class="p-4 bg-slate-950/50 border border-slate-800 rounded-xl space-y-3">
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-it">Livelli previsti</div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-en hidden">Predicted inventory</div>
+          <div class="text-[10px] text-slate-500 lang-it">Il regolamento UE consente di centrare il target in qualsiasi giorno tra il 1° ottobre e il 1° dicembre</div>
+          <div class="text-[10px] text-slate-500 lang-en hidden">EU rules allow the target to be met on any day between 1 Oct and 1 Dec</div>
+        </div>
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="text-slate-500 text-[10px] uppercase tracking-wider">
+              <th class="text-left font-semibold pb-1"></th>
+              <th class="text-right font-semibold pb-1">1 nov</th>
+              <th class="text-right font-semibold pb-1">1 dic</th>
+            </tr>
+          </thead>
+          <tbody class="font-mono">
+            <tr class="border-t border-slate-900">
+              <td class="py-1 text-slate-400 font-sans">Europa</td>
+              <td class="py-1 text-right text-base font-bold" id="predEUText">–</td>
+              <td class="py-1 text-right text-base font-bold" id="predEUDec">–</td>
+            </tr>
+            <tr class="border-t border-slate-900">
+              <td class="py-1 text-slate-400 font-sans">Germania</td>
+              <td class="py-1 text-right text-base font-bold" id="predDEText">–</td>
+              <td class="py-1 text-right text-base font-bold" id="predDEDec">–</td>
+            </tr>
+            <tr class="border-t border-slate-900">
+              <td class="py-1 text-slate-400 font-sans">Italia</td>
+              <td class="py-1 text-right text-base font-bold" id="predITText">–</td>
+              <td class="py-1 text-right text-base font-bold" id="predITDec">–</td>
+            </tr>
+          </tbody>
+        </table>
+        <p id="capNote" class="text-[9.5px] text-slate-500 leading-snug"></p>
+      </div>
 
-        const valEU = document.getElementById('valEU');
-        const valDE = document.getElementById('valDE');
-        const valIT = document.getElementById('valIT');
+    </div>
+  </section>
 
-        const txtEU = document.getElementById('predEUText');
-        const txtDE = document.getElementById('predDEText');
-        const txtIT = document.getElementById('predITText');
-        const seasonalToggle = document.getElementById('seasonalToggle');
-        const seasonalParamsBox = document.getElementById('seasonalParamsBox');
+  <section class="lg:col-span-8 space-y-6">
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold text-white lang-it">Traiettoria e Simulazione Stoccaggi Gas</h2>
+        <h2 class="text-lg font-semibold text-white lang-en hidden">Gas Storage Trajectory &amp; Simulation</h2>
+      </div>
+      <div class="relative h-[500px] w-full bg-slate-950/40 rounded-xl p-2 border border-slate-800/50">
+        <canvas id="storageChart"></canvas>
+      </div>
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-[10px] text-slate-500 leading-snug">
+        <p class="lang-it"><span class="text-slate-300 font-semibold">UE 90% / 80%.</span> Il target resta 90%, ma il regolamento emendato nel 2025 consente una deviazione fino a 10 punti in condizioni difficili di riempimento, più altri 5 con atto delegato della Commissione. La soglia realmente vincolante è quindi 80%, in scenario sfavorevole 75%.</p>
+        <p class="lang-it"><span class="text-slate-300 font-semibold">DE ~70%.</span> L'obbligo tedesco è 80% per singolo impianto, con sei impianti derogati al 45%: la media nazionale equivalente vale circa 70%, ed è il livello a cui la Germania ha formalmente abbassato il proprio obiettivo.</p>
+        <p class="lang-en hidden"><span class="text-slate-300 font-semibold">EU 90% / 80%.</span> The target stays at 90%, but the 2025 amendment allows a deviation of up to 10 points under difficult filling conditions, plus 5 more by delegated act. The binding floor is therefore 80%, or 75% in an adverse scenario.</p>
+        <p class="lang-en hidden"><span class="text-slate-300 font-semibold">DE ~70%.</span> The German obligation is 80% per facility, with six facilities derogated to 45%: the equivalent national average is about 70%, and that is the level Germany formally lowered its own target to.</p>
+      </div>
+    </div>
+  </section>
 
-        // Target numeric input overrides for the seasonal parameters
-        const inputSeptEU = document.getElementById('inputSeptEU');
-        const inputSeptDE = document.getElementById('inputSeptDE');
-        const inputSeptIT = document.getElementById('inputSeptIT');
-        const inputOctEU = document.getElementById('inputOctEU');
-        const inputOctDE = document.getElementById('inputOctDE');
-        const inputOctIT = document.getElementById('inputOctIT');
+</div>
+</main>
 
-        const ctx = document.getElementById('storageChart').getContext('2d');
-        let storageChart = null; let currentLang = 'it';
+<footer class="border-t border-slate-800 bg-slate-950 py-4 text-center text-xs text-slate-500">
+  <p>&copy; 2026 Hormuz Strait Gas Monitor. Data source: GIE AGSI Platform. <span id="lastUpdateTextIT"></span></p>
+</footer>
 
-        function changeWindow(winSize) {
-            selectedWindow = winSize;
-            ['15', '30', '60'].forEach(w => {
-                const btn = document.getElementById('btnWin' + w);
-                if (w === winSize) {
-                    btn.className = "py-1.5 text-xs font-semibold rounded-lg transition-all bg-slate-800 text-white border border-slate-700";
-                } else {
-                    btn.className = "py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white";
-                }
-            });
-            
-            if (ratesData.EU) {
-                sliderEU.value = ratesData.EU[selectedWindow];
-                sliderDE.value = ratesData.DE[selectedWindow];
-                sliderIT.value = ratesData.IT[selectedWindow];
-                updateSim();
-            }
+<script>
+// ---------------------------------------------------------------------------
+// Tetti e pavimenti fisici.
+// max = capacita' contrattualizzata / capacita' tecnica. Non e' il 100%:
+// la Germania al 11-09-2026 aveva 206,84 TWh prenotati su 247,49 tecnici.
+// Se data.json espone `caps`, quei valori hanno la precedenza su questi.
+// min = pavimento operativo (gas cuscino + pressione). Minimo DE osservato
+// dal 2020: 20,46% il 25-02-2026.
+// ---------------------------------------------------------------------------
+const CAP_FALLBACK = { EU: 95.0, DE: 83.6, IT: 94.6 };
+const FLOOR = 20.0;
+let CAPS = Object.assign({}, CAP_FALLBACK);
+
+// Preset dei tassi autunnali DE, calcolati sulla serie AGSI 2020-2026.
+const PRESETS = {
+  p2021: { de: [0.295, 0.146, -0.247], label: '2021' },
+  base:  { de: [0.205, 0.100, -0.250], label: 'Base' },
+  p2025: { de: [0.200, -0.045, -0.260], label: '2025' }
+};
+
+// Novembre e' sempre negativo: DE dal 2020 va da -0,019 a -0,260, e nei due
+// anni confrontabili per livello (2021, 2025) vale -0,247 e -0,260.
+// Se data.json non espone novHist si usano questi fallback.
+const NOV_FALLBACK = { EU: -0.20, DE: -0.25, IT: -0.25 };
+
+let datesLabels = [];
+let euHist = [], deHist = [], itHist = [];
+let histLength = 0, ratesData = {};
+let selectedWindow = '30';
+
+const sliderEU = document.getElementById('rateEU');
+const sliderDE = document.getElementById('rateDE');
+const sliderIT = document.getElementById('rateIT');
+const valEU = document.getElementById('valEU');
+const valDE = document.getElementById('valDE');
+const valIT = document.getElementById('valIT');
+const seasonalToggle = document.getElementById('seasonalToggle');
+const seasonalParamsBox = document.getElementById('seasonalParamsBox');
+
+const inputSeptEU = document.getElementById('inputSeptEU');
+const inputSeptDE = document.getElementById('inputSeptDE');
+const inputSeptIT = document.getElementById('inputSeptIT');
+const inputOctEU = document.getElementById('inputOctEU');
+const inputOctDE = document.getElementById('inputOctDE');
+const inputOctIT = document.getElementById('inputOctIT');
+const inputNovEU = document.getElementById('inputNovEU');
+const inputNovDE = document.getElementById('inputNovDE');
+const inputNovIT = document.getElementById('inputNovIT');
+
+const ctx = document.getElementById('storageChart').getContext('2d');
+let storageChart = null, currentLang = 'it';
+let idxNov = -1, idxDec = -1;
+
+function clamp(v, key) {
+  return Math.max(FLOOR, Math.min(CAPS[key], v));
+}
+
+function changeWindow(winSize) {
+  selectedWindow = winSize;
+  ['15', '30', '60'].forEach(w => {
+    const btn = document.getElementById('btnWin' + w);
+    btn.className = (w === winSize)
+      ? "py-1.5 text-xs font-semibold rounded-lg transition-all bg-slate-800 text-white border border-slate-700"
+      : "py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white";
+  });
+  if (ratesData.EU) {
+    sliderEU.value = ratesData.EU[selectedWindow];
+    sliderDE.value = ratesData.DE[selectedWindow];
+    sliderIT.value = ratesData.IT[selectedWindow];
+    updateSim();
+  }
+}
+
+function resetSeasonalInputsToDefault() {
+  if (!ratesData.EU) return;
+  inputSeptEU.value = ratesData.EU.septHist;
+  inputSeptDE.value = ratesData.DE.septHist;
+  inputSeptIT.value = ratesData.IT.septHist;
+  inputOctEU.value = ratesData.EU.octHist;
+  inputOctDE.value = ratesData.DE.octHist;
+  inputOctIT.value = ratesData.IT.octHist;
+  inputNovEU.value = (ratesData.EU.novHist !== undefined) ? ratesData.EU.novHist : NOV_FALLBACK.EU;
+  inputNovDE.value = (ratesData.DE.novHist !== undefined) ? ratesData.DE.novHist : NOV_FALLBACK.DE;
+  inputNovIT.value = (ratesData.IT.novHist !== undefined) ? ratesData.IT.novHist : NOV_FALLBACK.IT;
+}
+
+function applyPreset(key) {
+  const p = PRESETS[key];
+  if (!p) return;
+  if (!seasonalToggle.checked) {
+    seasonalToggle.checked = true;
+    seasonalParamsBox.classList.remove('hidden');
+    resetSeasonalInputsToDefault();
+  }
+  inputSeptDE.value = p.de[0];
+  inputOctDE.value = p.de[1];
+  inputNovDE.value = p.de[2];
+  updateSim();
+}
+
+// Estende l'asse fino al 1 dicembre: e' la fine della finestra legale UE,
+// non il 1 novembre. Se data.json arriva gia' piu' in la', non tocca nulla.
+function extendHorizon() {
+  if (!datesLabels.length) return;
+  const last = new Date(datesLabels[datesLabels.length - 1] + 'T00:00:00Z');
+  const lastReal = new Date(datesLabels[histLength - 1] + 'T00:00:00Z');
+  const year = lastReal.getUTCMonth() >= 3 ? lastReal.getUTCFullYear() : lastReal.getUTCFullYear() - 1;
+  const target = new Date(Date.UTC(year, 11, 1));
+  let cur = new Date(last.getTime());
+  while (cur < target) {
+    cur = new Date(cur.getTime() + 86400000);
+    datesLabels.push(cur.toISOString().slice(0, 10));
+  }
+}
+
+function findIndex(mmdd) {
+  for (let i = histLength - 1; i < datesLabels.length; i++) {
+    if (datesLabels[i].slice(5) === mmdd) return i;
+  }
+  return -1;
+}
+
+function buildProjections() {
+  const rEU = parseFloat(sliderEU.value);
+  const rDE = parseFloat(sliderDE.value);
+  const rIT = parseFloat(sliderIT.value);
+
+  valEU.innerText = (rEU >= 0 ? '+' : '') + rEU.toFixed(2) + '%';
+  valDE.innerText = (rDE >= 0 ? '+' : '') + rDE.toFixed(2) + '%';
+  valIT.innerText = (rIT >= 0 ? '+' : '') + rIT.toFixed(2) + '%';
+
+  let euProj = Array(histLength - 1).fill(null);
+  let deProj = Array(histLength - 1).fill(null);
+  let itProj = Array(histLength - 1).fill(null);
+
+  let currentEU = euHist[histLength - 1];
+  let currentDE = deHist[histLength - 1];
+  let currentIT = itHist[histLength - 1];
+  euProj.push(currentEU); deProj.push(currentDE); itProj.push(currentIT);
+
+  const futureLength = datesLabels.length - histLength;
+  const isSeasonalActive = seasonalToggle.checked;
+  const lastRealMonth = parseInt(datesLabels[histLength - 1].split('-')[1], 10);
+
+  for (let i = 1; i <= futureLength; i++) {
+    const month = parseInt(datesLabels[histLength - 1 + i].split('-')[1], 10);
+    let rateEU = rEU, rateDE = rDE, rateIT = rIT;
+
+    // FIX: era `month > lastRealMonth`, che disattivava del tutto il campo
+    // Settembre finche' l'ultimo dato reale cadeva in settembre. Con `>=`
+    // anche i giorni residui del mese in corso usano il tasso autunnale.
+    if (isSeasonalActive && month >= lastRealMonth) {
+      if (month === 9) {
+        rateEU = parseFloat(inputSeptEU.value) || 0;
+        rateDE = parseFloat(inputSeptDE.value) || 0;
+        rateIT = parseFloat(inputSeptIT.value) || 0;
+      } else if (month === 10) {
+        rateEU = parseFloat(inputOctEU.value) || 0;
+        rateDE = parseFloat(inputOctDE.value) || 0;
+        rateIT = parseFloat(inputOctIT.value) || 0;
+      } else if (month === 11) {
+        rateEU = parseFloat(inputNovEU.value) || 0;
+        rateDE = parseFloat(inputNovDE.value) || 0;
+        rateIT = parseFloat(inputNovIT.value) || 0;
+      }
+    }
+
+    currentEU = clamp(currentEU + rateEU, 'EU');
+    currentDE = clamp(currentDE + rateDE, 'DE');
+    currentIT = clamp(currentIT + rateIT, 'IT');
+    euProj.push(currentEU); deProj.push(currentDE); itProj.push(currentIT);
+  }
+  return { euProj, deProj, itProj };
+}
+
+function initChart() {
+  const { euProj, deProj, itProj } = buildProjections();
+  const n = datesLabels.length;
+  const pad = Array(n - histLength).fill(null);
+  const line = (v, color) => ({
+    label: v.label, data: Array(n).fill(v.y), borderColor: color,
+    borderWidth: 1.5, borderDash: [3, 3], pointRadius: 0, fill: false
+  });
+
+  storageChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: datesLabels,
+      datasets: [
+        { label: 'EU Reale', data: [...euHist, ...pad], borderColor: '#10b981', borderWidth: 3, pointRadius: 0, fill: false },
+        { label: 'DE Reale', data: [...deHist, ...pad], borderColor: '#f59e0b', borderWidth: 3, pointRadius: 0, fill: false },
+        { label: 'IT Reale', data: [...itHist, ...pad], borderColor: '#3b82f6', borderWidth: 3, pointRadius: 0, fill: false },
+        { label: 'EU Proiezione', data: euProj, borderColor: '#10b981', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false },
+        { label: 'DE Proiezione', data: deProj, borderColor: '#f59e0b', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false },
+        { label: 'IT Proiezione', data: itProj, borderColor: '#3b82f6', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false },
+        line({ label: 'UE 90% nominale', y: 90 }, 'rgba(16,185,129,0.18)'),
+        line({ label: 'UE 80% con flessibilita\u0300', y: 80 }, 'rgba(16,185,129,0.40)'),
+        line({ label: 'DE ~70% media naz.', y: 70 }, 'rgba(239,68,68,0.40)'),
+        line({ label: 'Pavimento tecnico 20%', y: FLOOR }, 'rgba(148,163,184,0.35)')
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: '#94a3b8', boxWidth: 20, font: { size: 10 } } },
+        tooltip: {
+          callbacks: {
+            label: c => c.parsed.y === null ? null : c.dataset.label + ': ' + c.parsed.y.toFixed(2) + '%'
+          }
         }
+      },
+      scales: {
+        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } },
+        y: { min: 0, max: 100, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', callback: v => v + '%' } }
+      }
+    }
+  });
+}
 
-        function resetSeasonalInputsToDefault() {
-            if (!ratesData.EU) return;
-            inputSeptEU.value = ratesData.EU.septHist;
-            inputSeptDE.value = ratesData.DE.septHist;
-            inputSeptIT.value = ratesData.IT.septHist;
-            inputOctEU.value = ratesData.EU.octHist;
-            inputOctDE.value = ratesData.DE.octHist;
-            inputOctIT.value = ratesData.IT.octHist;
-        }
+function paint(id, value, threshold, okColor) {
+  const el = document.getElementById(id);
+  if (value === null || value === undefined) { el.innerText = '–'; return; }
+  el.innerText = value.toFixed(1) + '%';
+  el.style.color = value < threshold ? '#ef4444' : okColor;
+}
 
-        function buildProjections() {
-            const rEU = parseFloat(sliderEU.value);
-            const rDE = parseFloat(sliderDE.value);
-            const rIT = parseFloat(sliderIT.value);
+function updateSim() {
+  if (!storageChart) return;
+  const { euProj, deProj, itProj } = buildProjections();
+  storageChart.data.datasets[3].data = euProj;
+  storageChart.data.datasets[4].data = deProj;
+  storageChart.data.datasets[5].data = itProj;
+  storageChart.update();
 
-            valEU.innerText = (rEU >= 0 ? '+' : '') + rEU.toFixed(2) + '%';
-            valDE.innerText = (rDE >= 0 ? '+' : '') + rDE.toFixed(2) + '%';
-            valIT.innerText = (rIT >= 0 ? '+' : '') + rIT.toFixed(2) + '%';
+  const at = (arr, i) => (i >= 0 && i < arr.length) ? arr[i] : null;
+  paint('predEUText', at(euProj, idxNov), 80, '#10b981');
+  paint('predDEText', at(deProj, idxNov), 70, '#f59e0b');
+  paint('predITText', at(itProj, idxNov), 80, '#3b82f6');
+  paint('predEUDec', at(euProj, idxDec), 80, '#10b981');
+  paint('predDEDec', at(deProj, idxDec), 70, '#f59e0b');
+  paint('predITDec', at(itProj, idxDec), 80, '#3b82f6');
+}
 
-            let euProj = Array(histLength - 1).fill(null);
-            let deProj = Array(histLength - 1).fill(null);
-            let itProj = Array(histLength - 1).fill(null);
+function toggleLanguage() {
+  const btn = document.getElementById('langToggleBtn');
+  if (currentLang === 'it') {
+    currentLang = 'en'; btn.innerHTML = '🇮🇹 Passa all\'Italiano';
+    document.querySelectorAll('.lang-it').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.lang-en').forEach(el => el.classList.remove('hidden'));
+  } else {
+    currentLang = 'it'; btn.innerHTML = '🇬🇧 Switch to English';
+    document.querySelectorAll('.lang-en').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.lang-it').forEach(el => el.classList.remove('hidden'));
+  }
+}
 
-            const lastEUVal = euHist[histLength - 1];
-            const lastDEVal = deHist[histLength - 1];
-            const lastITVal = itHist[histLength - 1];
+sliderEU.addEventListener('input', updateSim);
+sliderDE.addEventListener('input', updateSim);
+sliderIT.addEventListener('input', updateSim);
+[inputSeptEU, inputSeptDE, inputSeptIT, inputOctEU, inputOctDE, inputOctIT,
+ inputNovEU, inputNovDE, inputNovIT]
+  .forEach(input => input.addEventListener('input', updateSim));
 
-            euProj.push(lastEUVal); deProj.push(lastDEVal); itProj.push(lastITVal);
+seasonalToggle.addEventListener('change', () => {
+  if (seasonalToggle.checked) {
+    seasonalParamsBox.classList.remove('hidden');
+    resetSeasonalInputsToDefault();
+  } else {
+    seasonalParamsBox.classList.add('hidden');
+  }
+  updateSim();
+});
 
-            const futureLength = datesLabels.length - histLength;
-            const isSeasonalActive = seasonalToggle.checked;
+document.getElementById('langToggleBtn').addEventListener('click', toggleLanguage);
 
-            // SMART ROLLOVER: Extract the month of the latest available real data point
-            const lastRealMonth = parseInt(datesLabels[histLength - 1].split('-')[1]);
+window.onload = function () {
+  fetch('./data.json')
+    .then(r => { if (!r.ok) throw new Error('no live data'); return r.json(); })
+    .catch(() => fetch('./data_fallback.json').then(r => r.json()))
+    .then(jsonData => {
+      datesLabels = jsonData.datesLabels;
+      euHist = jsonData.euHist; deHist = jsonData.deHist; itHist = jsonData.itHist;
+      histLength = euHist.length;
+      ratesData = jsonData.rates;
 
-            let currentEU = lastEUVal;
-            let currentDE = lastDEVal;
-            let currentIT = lastITVal;
+      if (jsonData.caps) CAPS = Object.assign({}, CAP_FALLBACK, jsonData.caps);
 
-            for (let i = 1; i <= futureLength; i++) {
-                const futureDateStr = datesLabels[histLength - 1 + i];
-                const month = parseInt(futureDateStr.split('-')[1]);
+      extendHorizon();
+      idxNov = findIndex('11-01');
+      idxDec = findIndex('12-01');
 
-                let currentRateEU = rEU;
-                let currentRateDE = rDE;
-                let currentRateIT = rIT;
+      sliderEU.value = ratesData.EU[selectedWindow];
+      sliderDE.value = ratesData.DE[selectedWindow];
+      sliderIT.value = ratesData.IT[selectedWindow];
+      resetSeasonalInputsToDefault();
 
-                // Seasonal rates only apply if the target month is strictly in the future 
-                // compared to the current real data calendar month
-                if (isSeasonalActive && month > lastRealMonth) {
-                    if (month === 9) {
-                        currentRateEU = parseFloat(inputSeptEU.value) || 0;
-                        currentRateDE = parseFloat(inputSeptDE.value) || 0;
-                        currentRateIT = parseFloat(inputSeptIT.value) || 0;
-                    } else if (month === 10) {
-                        currentRateEU = parseFloat(inputOctEU.value) || 0;
-                        currentRateDE = parseFloat(inputOctDE.value) || 0;
-                        currentRateIT = parseFloat(inputOctIT.value) || 0;
-                    }
-                }
+      document.getElementById('lastUpdateTextIT').innerText = ' | Last data: ' + datesLabels[histLength - 1];
+      document.getElementById('capNote').innerText =
+        'Tetto di riempimento usato: EU ' + CAPS.EU.toFixed(1) + '%, DE ' + CAPS.DE.toFixed(1) +
+        '%, IT ' + CAPS.IT.toFixed(1) + '% della capacita\u0300 tecnica (capacita\u0300 contrattualizzata). ' +
+        'Pavimento ' + FLOOR.toFixed(0) + '%.';
 
-                currentEU = Math.max(0, Math.min(100, currentEU + currentRateEU));
-                currentDE = Math.max(0, Math.min(100, currentDE + currentRateDE));
-                currentIT = Math.max(0, Math.min(100, currentIT + currentRateIT));
-
-                euProj.push(currentEU);
-                deProj.push(currentDE);
-                itProj.push(currentIT);
-            }
-            return { euProj, deProj, itProj };
-        }
-
-        function initChart() {
-            const { euProj, deProj, itProj } = buildProjections();
-            storageChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: datesLabels,
-                    datasets: [
-                        { label: 'EU Reale', data: [...euHist, ...Array(datesLabels.length - histLength).fill(null)], borderColor: '#10b981', borderWidth: 3, pointRadius: 0, fill: false },
-                        { label: 'DE Reale', data: [...deHist, ...Array(datesLabels.length - histLength).fill(null)], borderColor: '#f59e0b', borderWidth: 3, pointRadius: 0, fill: false },
-                        { label: 'IT Reale', data: [...itHist, ...Array(datesLabels.length - histLength).fill(null)], borderColor: '#3b82f6', borderWidth: 3, pointRadius: 0, fill: false },
-                        { label: 'EU Proiezione', data: euProj, borderColor: '#10b981', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false },
-                        { label: 'DE Proiezione', data: deProj, borderColor: '#f59e0b', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false },
-                        { label: 'IT Proiezione', data: itProj, borderColor: '#3b82f6', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false },
-                        { label: 'Target UE (90%)', data: Array(datesLabels.length).fill(90), borderColor: 'rgba(16, 185, 129, 0.2)', borderWidth: 1.5, borderDash: [3, 3], pointRadius: 0, fill: false },
-                        { label: 'Target DE (80%)', data: Array(datesLabels.length).fill(80), borderColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 1.5, borderDash: [3, 3], pointRadius: 0, fill: false }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#94a3b8', boxWidth: 20 } } },
-                    scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } },
-                        y: { min: 0, max: 100, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', callback: v => v + '%' } }
-                    }
-                }
-            });
-        }
-
-        function updateSim() {
-            if (!storageChart) return;
-            const { euProj, deProj, itProj } = buildProjections();
-            storageChart.data.datasets[3].data = euProj;
-            storageChart.data.datasets[4].data = deProj;
-            storageChart.data.datasets[5].data = itProj;
-            storageChart.update();
-
-            const finalEU = euProj[euProj.length - 1];
-            const finalDE = deProj[deProj.length - 1];
-            const finalIT = itProj[itProj.length - 1];
-
-            txtEU.innerText = finalEU.toFixed(2) + '%';
-            txtDE.innerText = finalDE.toFixed(2) + '%';
-            txtIT.innerText = finalIT.toFixed(2) + '%';
-
-            txtEU.style.color = finalEU < 90 ? '#ef4444' : '#10b981';
-            txtDE.style.color = finalDE < 80 ? '#ef4444' : '#f59e0b';
-            txtIT.style.color = finalIT < 90 ? '#ef4444' : '#3b82f6';
-        }
-
-        function toggleLanguage() {
-            const btn = document.getElementById('langToggleBtn');
-            if (currentLang === 'it') {
-                currentLang = 'en'; btn.innerHTML = '🇮🇹 Passa all\'Italiano';
-                document.querySelectorAll('.lang-it').forEach(el => el.classList.add('hidden'));
-                document.querySelectorAll('.lang-en').forEach(el => el.classList.remove('hidden'));
-            } else {
-                currentLang = 'it'; btn.innerHTML = '🇬🇧 Switch to English';
-                document.querySelectorAll('.lang-en').forEach(el => el.classList.add('hidden'));
-                document.querySelectorAll('.lang-it').forEach(el => el.classList.remove('hidden'));
-            }
-        }
-
-        sliderEU.addEventListener('input', updateSim);
-        sliderDE.addEventListener('input', updateSim);
-        sliderIT.addEventListener('input', updateSim);
-        
-        // Input listeners for the custom parameters box to render shifts fluidly
-        [inputSeptEU, inputSeptDE, inputSeptIT, inputOctEU, inputOctDE, inputOctIT].forEach(input => {
-            input.addEventListener('input', updateSim);
-        });
-
-        seasonalToggle.addEventListener('change', () => {
-            if (seasonalToggle.checked) {
-                seasonalParamsBox.classList.remove('hidden');
-                resetSeasonalInputsToDefault(); // Re-apply default parameters dynamically on click
-            } else {
-                seasonalParamsBox.classList.add('hidden');
-            }
-            updateSim();
-        });
-
-        document.getElementById('langToggleBtn').addEventListener('click', toggleLanguage);
-
-        window.onload = function() {
-            fetch('./data.json')
-                .then(r => { if (!r.ok) throw new Error('no live data'); return r.json(); })
-                .catch(() => fetch('./data_fallback.json').then(r => r.json()))
-                .then(jsonData => {
-                    datesLabels = jsonData.datesLabels;
-                    euHist = jsonData.euHist; deHist = jsonData.deHist; itHist = jsonData.itHist;
-                    histLength = euHist.length;
-                    ratesData = jsonData.rates;
-
-                    sliderEU.value = ratesData.EU[selectedWindow];
-                    sliderDE.value = ratesData.DE[selectedWindow];
-                    sliderIT.value = ratesData.IT[selectedWindow];
-
-                    resetSeasonalInputsToDefault();
-
-                    const lastDate = datesLabels[histLength - 1];
-                    document.getElementById('lastUpdateTextIT').innerText = " | Last data: " + lastDate;
-
-                    initChart();
-                    updateSim();
-                })
-                .catch(err => console.error(err));
-        };
-    </script>
+      initChart();
+      updateSim();
+    })
+    .catch(err => console.error(err));
+};
+</script>
 </body>
 </html>
