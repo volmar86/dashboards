@@ -1,0 +1,42 @@
+name: Aggiornamento Storico AGSI
+
+on:
+  schedule:
+    - cron: '0 6 * * 2' # Runs each Tuesday at 06:00 UTC
+  workflow_dispatch: # Can be run manually with a click on GitHub
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-history
+  cancel-in-progress: false
+
+jobs:
+  update-history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install Requests
+      run: pip install requests
+
+    - name: Extract history from API AGSI
+      env:
+        AGSI_KEY: ${{ secrets.AGSI_API_KEY }}
+        MAX_MINUTES: '330'
+      run: python dashboards_live/lng-history/fetch_history.py
+
+    - name: Save in GitHub server
+      run: |
+        git config --global user.name 'AGSI Bot'
+        git config --global user.email 'bot@github.com'
+        git add dashboards_live/lng-history/history.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update of AGSI history" && git pull --rebase origin main && git push)
