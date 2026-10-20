@@ -11,7 +11,7 @@ import json
 import os
 import sys
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import requests
 
@@ -23,7 +23,8 @@ HISTORY_START = date(2011, 1, 1)   # primo giorno disponibile su AGSI
 CHUNK_DAYS = 299                   # una pagina da 300 righe copre 299 giorni
 OVERLAP_DAYS = 10
 RETRY_SLEEP = 65
-MAX_RETRIES = 8
+MAX_RETRIES = 5
+CALL_PAUSE = 2   # secondi tra una chiamata e l'altra, per non inondare l'API
 
 # Paesi presenti nell'elenco di https://agsi.gie.eu/api/about?show=listing.
 COUNTRIES = {
@@ -54,14 +55,18 @@ def get_json(url):
         if body is None:
             raise RuntimeError(f'risposta non JSON ({res.status_code}): {res.text[:200]}')
         if body.get('error'):
-            msg = str(body.get('message', '')) + str(body.get('error', ''))
-            if 'limit' in msg.lower() or 'many' in msg.lower():
-                print(f'  limite chiamate, attendo {RETRY_SLEEP}s (tentativo {attempt + 1})')
-                time.sleep(RETRY_SLEEP)
-                continue
-            raise RuntimeError(f'errore API: {msg}')
+            msg = str(body.get('message', '')) + ' ' + str(body.get('error', ''))
+            # Chiave sbagliata o accesso negato: inutile riprovare.
+            if 'access denied' in msg.lower() or 'invalid' in msg.lower():
+                raise RuntimeError(f'errore API: {msg}')
+            # Ogni altro errore (anche "Try/Catch error") e' trattato come un
+            # blocco temporaneo: attesa e nuovo tentativo.
+            print(f'  errore API "{msg.strip()}", attendo {RETRY_SLEEP}s (tentativo {attempt + 1}/{MAX_RETRIES})', flush=True)
+            time.sleep(RETRY_SLEEP)
+            continue
+        time.sleep(CALL_PAUSE)
         return body
-    raise RuntimeError('troppi tentativi, API ancora limitata')
+    raise RuntimeError('troppi tentativi, API ancora in errore')
 
 
 def fetch_range(code, d_from, d_to):
@@ -117,7 +122,7 @@ def save(store):
             values.append(days.get(cur.isoformat()))
             cur += timedelta(days=1)
         countries[code] = {'name': COUNTRIES[code], 'start': first.isoformat(), 'values': values}
-    payload = {'updated': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'), 'countries': countries}
+    payload = {'updated': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'), 'countries': countries}
     with open(OUT, 'w', encoding='utf-8') as f:
         json.dump(payload, f, separators=(',', ':'))
 
@@ -133,7 +138,7 @@ def main():
     for code in COUNTRIES:
         days = store.setdefault(code, {})
         cur = max(HISTORY_START, date.fromisoformat(max(days)) - timedelta(days=OVERLAP_DAYS)) if days else HISTORY_START
-        print(f'{code}: da {cur.isoformat()} ({len(days)} giorni gia\' salvati)')
+        print(f'{code}: da {cur.isoformat()} ({len(days)} giorni gia\' salvati)', flush=True)
 
         while cur <= today:
             if time.time() > deadline:
@@ -143,13 +148,15 @@ def main():
             try:
                 days.update(fetch_range(code, cur, end))
             except Exception as e:
-                print(f'  errore {code} {cur}..{end}: {e}')
+                # Questo paese si ferma qui, il prossimo run riprende da dove
+                # era arrivato; si passa comunque agli altri paesi.
+                print(f'  errore {code} {cur}..{end}: {e}', flush=True)
                 complete = False
                 break
             cur = end + timedelta(days=1)
 
-        save(store)   # salva dopo ogni paese e dopo ogni interruzione
-        if not complete:
+        save(store)   # salva dopo ogni paese
+        if time.time() > deadline:
             break
 
     for code, days in store.items():
