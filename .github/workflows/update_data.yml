@@ -34,8 +34,11 @@ jobs:
         from datetime import datetime, timedelta
 
         headers = {'x-key': os.environ.get('AGSI_KEY')}
-        start_date = '2025-10-01'
-        target_end = '2026-11-01'
+        today = datetime.utcnow()
+        season_year = today.year if today.month >= 4 else today.year - 1
+        start_date = f'{season_year - 1}-10-01'
+        target_end = f'{season_year}-11-01'
+
 
         def fetch_data(region_code, custom_start=None, custom_end=None):
             data_map = {}
