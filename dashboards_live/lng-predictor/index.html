@@ -163,6 +163,31 @@
                     </div>
                 </div>
 
+                <div class="p-4 bg-slate-950/50 border border-slate-800 rounded-xl space-y-2">
+                    <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-it">Livelli previsti in inverno</div>
+                    <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-en hidden">Predicted winter inventory</div>
+                    <div class="grid grid-cols-4 gap-1 text-right items-center">
+                        <span></span>
+                        <span class="text-[10px] text-slate-500 font-bold"><span class="lang-it">31 Gen</span><span class="lang-en hidden">31 Jan</span></span>
+                        <span class="text-[10px] text-slate-500 font-bold">28 Feb</span>
+                        <span class="text-[10px] text-slate-500 font-bold">31 Mar</span>
+                        <span class="text-xs text-slate-400 text-left">EU</span>
+                        <span class="text-sm font-bold font-mono" id="win-EU-0">n/d</span>
+                        <span class="text-sm font-bold font-mono" id="win-EU-1">n/d</span>
+                        <span class="text-sm font-bold font-mono" id="win-EU-2">n/d</span>
+                        <span class="text-xs text-slate-400 text-left">DE</span>
+                        <span class="text-sm font-bold font-mono" id="win-DE-0">n/d</span>
+                        <span class="text-sm font-bold font-mono" id="win-DE-1">n/d</span>
+                        <span class="text-sm font-bold font-mono" id="win-DE-2">n/d</span>
+                        <span class="text-xs text-slate-400 text-left">IT</span>
+                        <span class="text-sm font-bold font-mono" id="win-IT-0">n/d</span>
+                        <span class="text-sm font-bold font-mono" id="win-IT-1">n/d</span>
+                        <span class="text-sm font-bold font-mono" id="win-IT-2">n/d</span>
+                    </div>
+                    <p class="text-[9.5px] text-slate-500 leading-snug lang-it">Disponibili solo con un tasso negativo dopo il 30 novembre: attiva i consumi autunnali/invernali.</p>
+                    <p class="text-[9.5px] text-slate-500 leading-snug lang-en hidden">Available only with a negative rate after Nov 30: enable autumn/winter drawdown.</p>
+                </div>
+
             </div>
         </section>
 
@@ -214,11 +239,21 @@
     // Freddo: 2020/21 -0,526 e 2024/25 -0,535.
     const SEVERITY = { mild: -0.25, avg: -0.41, cold: -0.53 };
 
-    // Giorni di proiezione aggiunti oltre l'orizzonte di data.json quando lo
-    // svuotamento e' attivo: senza, la curva non avrebbe giorni su cui scendere.
-    const DRAWDOWN_HORIZON_DAYS = 150;
+    // Oltre questo giorno (MM-DD) la proiezione prosegue solo con tasso
+    // negativo: col tasso estivo positivo l'iniezione e' considerata finita.
+    const FILL_CUTOFF_MMDD = '11-30';
+
+    // Letture invernali mostrate nel riquadro (MM-DD).
+    const WINTER_READS = [['01-31', 'Jan'], ['02-28', 'Feb'], ['03-31', 'Mar']];
 
     let baseLabels = [];
+
+    // Prima occorrenza di MM-DD non precedente a fromStr (stringhe ISO).
+    function nextOccurrence(fromStr, mmdd) {
+        const y = parseInt(fromStr.slice(0, 4), 10);
+        const cand = y + '-' + mmdd;
+        return cand >= fromStr ? cand : (y + 1) + '-' + mmdd;
+    }
 
     const ctx = document.getElementById('storageChart').getContext('2d');
     let storageChart = null; let currentLang = 'it';
@@ -270,14 +305,13 @@
         return y + '-11-01';
     }
 
-    // L'asse si allunga solo se lo svuotamento e' acceso e la data di inizio
-    // cade oltre (o a ridosso del) l'orizzonte fornito da data.json.
+    // L'asse arriva sempre al 31 marzo successivo all'ultimo dato reale,
+    // con o senza svuotamento (e mai prima dell'orizzonte di data.json).
     function buildLabels() {
-        if (!drawdownToggle.checked) return baseLabels.slice();
         const labels = baseLabels.slice();
-        const start = new Date(drawdownStart.value + 'T00:00:00Z');
-        if (isNaN(start)) return labels;
-        const target = new Date(start.getTime() + DRAWDOWN_HORIZON_DAYS * 86400000);
+        const mar31 = nextOccurrence(baseLabels[histLength - 1], '03-31');
+        const endStr = mar31 > labels[labels.length - 1] ? mar31 : labels[labels.length - 1];
+        const target = new Date(endStr + 'T00:00:00Z');
         let cur = new Date(labels[labels.length - 1] + 'T00:00:00Z');
         while (cur < target) {
             cur = new Date(cur.getTime() + 86400000);
@@ -307,6 +341,7 @@
         const futureLength = labels.length - histLength;
         const isDrawdownActive = drawdownToggle.checked;
         const startStr = drawdownStart.value;
+        const fillCutoff = defaultDrawdownStart().slice(0, 4) + '-' + FILL_CUTOFF_MMDD;
 
         let currentEU = lastEUVal;
         let currentDE = lastDEVal;
@@ -328,13 +363,18 @@
                 currentRateIT = parseFloat(inputDrawIT.value) || 0;
             }
 
-            currentEU = Math.max(0, Math.min(100, currentEU + currentRateEU));
-            currentDE = Math.max(0, Math.min(100, currentDE + currentRateDE));
-            currentIT = Math.max(0, Math.min(100, currentIT + currentRateIT));
+            // Dopo il cutoff un tasso >= 0 non disegna piu' la curva; il livello
+            // resta fermo e riparte solo da un tasso negativo.
+            const pastCutoff = futureDateStr > fillCutoff;
 
-            euProj.push(currentEU);
-            deProj.push(currentDE);
-            itProj.push(currentIT);
+            if (pastCutoff && currentRateEU >= 0) euProj.push(null);
+            else { currentEU = Math.max(0, Math.min(100, currentEU + currentRateEU)); euProj.push(currentEU); }
+
+            if (pastCutoff && currentRateDE >= 0) deProj.push(null);
+            else { currentDE = Math.max(0, Math.min(100, currentDE + currentRateDE)); deProj.push(currentDE); }
+
+            if (pastCutoff && currentRateIT >= 0) itProj.push(null);
+            else { currentIT = Math.max(0, Math.min(100, currentIT + currentRateIT)); itProj.push(currentIT); }
         }
 
         return { euProj, deProj, itProj };
@@ -408,6 +448,21 @@
         txtEU.style.color = finalEU < 90 ? '#ef4444' : '#10b981';
         txtDE.style.color = finalDE < 80 ? '#ef4444' : '#f59e0b';
         txtIT.style.color = finalIT < 90 ? '#ef4444' : '#3b82f6';
+
+        // Letture invernali: valore della curva alla data, "n/d" se la curva
+        // li' non e' disegnata (tasso non negativo dopo il cutoff).
+        const winSeries = { EU: euProj, DE: deProj, IT: itProj };
+        const winColors = { EU: '#10b981', DE: '#f59e0b', IT: '#3b82f6' };
+        const lastReal = baseLabels[histLength - 1];
+        WINTER_READS.forEach(([mmdd], k) => {
+            const wi = datesLabels.indexOf(nextOccurrence(lastReal, mmdd));
+            ['EU', 'DE', 'IT'].forEach(key => {
+                const el = document.getElementById('win-' + key + '-' + k);
+                const v = wi === -1 ? null : winSeries[key][wi];
+                el.innerText = v === null ? 'n/d' : v.toFixed(1) + '%';
+                el.style.color = v === null ? '#64748b' : winColors[key];
+            });
+        });
     }
 
     function toggleLanguage() {
