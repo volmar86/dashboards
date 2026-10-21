@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hormuz Gas History v1.0</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-full flex flex-col justify-between">
+
+<header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-emerald-600/15 rounded-lg border border-emerald-500/30 text-emerald-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 3 3 5-6" />
+                </svg>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <span class="lang-it">Storico Stoccaggi Gas</span>
+                <span class="lang-en hidden">Gas Storage History</span>
+                <span class="text-xs font-semibold px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-300">v1.0</span>
+            </h1>
+        </div>
+        <button id="langToggleBtn" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold uppercase">
+            🇬🇧 Switch to English
+        </button>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <section class="lg:col-span-4 space-y-6">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
+
+                <div class="space-y-2">
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider lang-it">Paesi</span>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider lang-en hidden">Countries</span>
+                        <span id="countCounter" class="text-[10px] text-slate-500 font-mono"></span>
+                    </div>
+                    <div id="chips" class="flex flex-wrap gap-1.5 min-h-[28px]"></div>
+                    <input id="countrySearch" type="text" autocomplete="off" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-emerald-600 focus:outline-none" placeholder="Cerca / Search">
+                    <div id="countryList" class="max-h-44 overflow-y-auto bg-slate-950 border border-slate-800 rounded-lg divide-y divide-slate-900"></div>
+                    <p id="limitNote" class="text-[10px] text-amber-400 hidden"></p>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="yearsSelect" class="text-xs font-bold text-slate-400 uppercase tracking-wider block lang-it">Anni nella fascia</label>
+                    <label for="yearsSelect" class="text-xs font-bold text-slate-400 uppercase tracking-wider block lang-en hidden">Years in the band</label>
+                    <select id="yearsSelect" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-emerald-600 focus:outline-none">
+                        <option value="3">3</option>
+                        <option value="5" selected>5</option>
+                        <option value="7">7</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                    </select>
+                    <p class="text-[10px] text-slate-500 leading-snug lang-it">Stagioni complete precedenti a quella in corso. Una stagione va dal 1 marzo al 1 marzo.</p>
+                    <p class="text-[10px] text-slate-500 leading-snug lang-en hidden">Complete seasons before the current one. A season runs from Mar 1 to Mar 1.</p>
+                </div>
+
+                <div id="singleOptions" class="space-y-2">
+                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="showBand" checked class="accent-emerald-500">
+                        <span class="lang-it">Mostra la fascia min-max</span><span class="lang-en hidden">Show the min-max band</span>
+                    </label>
+                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="showYears" checked class="accent-emerald-500">
+                        <span class="lang-it">Mostra le curve dei singoli anni</span><span class="lang-en hidden">Show each year's curve</span>
+                    </label>
+                </div>
+
+                <div class="border-b border-slate-800 pb-1">
+                    <h2 class="text-xs font-bold text-white uppercase tracking-wider lang-it">Come siamo messi</h2>
+                    <h2 class="text-xs font-bold text-white uppercase tracking-wider lang-en hidden">Where we stand</h2>
+                </div>
+                <div id="readouts" class="space-y-3"></div>
+
+            </div>
+        </section>
+
+        <section class="lg:col-span-8 space-y-6">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+                <div class="mb-4">
+                    <h2 id="chartTitle" class="text-lg font-semibold text-white"></h2>
+                    <p id="chartSub" class="text-xs text-slate-500 mt-1"></p>
+                </div>
+                <div class="relative h-[500px] w-full bg-slate-950/40 rounded-xl p-2 border border-slate-800/50">
+                    <canvas id="historyChart"></canvas>
+                    <div id="emptyMsg" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-500"></div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<footer class="border-t border-slate-800 bg-slate-950 py-4 text-center text-xs text-slate-500">
+    <p>&copy; 2026 Hormuz Strait Gas Monitor. Data source: GIE AGSI Platform. <span id="updatedText"></span></p>
+</footer>
+
+<script>
+    const MAX_COUNTRIES = 5;
+    const MULTI_COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#a855f7', '#ec4899'];
+    const CURRENT_COLOR = '#ef4444';
+    // Pastelli distinguibili sopra la fascia grigia, uno per anno.
+    const YEAR_COLORS = ['#7dd3fc', '#c4b5fd', '#fda4af', '#86efac', '#fcd34d', '#f9a8d4', '#a5b4fc', '#5eead4',
+                         '#fdba74', '#bef264', '#e879f9', '#67e8f9', '#fde68a', '#d8b4fe', '#fca5a5'];
+
+    const NAMES_EN = {
+        EU: 'Europe', AT: 'Austria', BE: 'Belgium', BG: 'Bulgaria', HR: 'Croatia', CZ: 'Czechia',
+        DK: 'Denmark', FR: 'France', DE: 'Germany', HU: 'Hungary', IE: 'Ireland', IT: 'Italy',
+        LV: 'Latvia', NL: 'Netherlands', PL: 'Poland', PT: 'Portugal', RO: 'Romania',
+        SK: 'Slovakia', ES: 'Spain', SE: 'Sweden', GB: 'United Kingdom', UA: 'Ukraine'
+    };
+    const MONTHS = {
+        it: ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'],
+        en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    };
+    const TXT = {
+        it: {
+            titleSingle: 'Storico stagionale', titleMulti: 'Confronto stagione in corso',
+            subSingle: n => `Fascia min-max sulle ultime ${n} stagioni complete, stagione in corso in rosso`,
+            subMulti: 'Solo la stagione in corso di ciascun paese (dal 1 marzo)',
+            band: (a, b) => `Fascia min-max ${a}-${b}`, bandMin: 'Minimo', bandMax: 'Massimo', median: 'Mediana',
+            target: 'Obiettivo UE 90%', nov1: '1 nov', current: s => `In corso ${s}`,
+            limit: `Massimo ${MAX_COUNTRIES} paesi.`, count: n => `${n}/${MAX_COUNTRIES}`,
+            empty: 'Scegli almeno un paese.', noData: 'Nessun dato per questo paese.',
+            level: 'Livello', onDate: 'al', median5: n => `Mediana ${n} anni`, range: 'Fascia',
+            above: pct => `sopra il ${pct}% degli anni`, vsPrev: 'vs stesso giorno stagione precedente',
+            seasonsUsed: (k, from) => `Fascia su ${k} stagioni, dal ${from}`, pt: 'pt'
+        },
+        en: {
+            titleSingle: 'Seasonal history', titleMulti: 'Current season comparison',
+            subSingle: n => `Min-max band over the last ${n} complete seasons, current season in red`,
+            subMulti: "Only each country's current season (from Mar 1)",
+            band: (a, b) => `Min-max band ${a}-${b}`, bandMin: 'Minimum', bandMax: 'Maximum', median: 'Median',
+            target: 'EU target 90%', nov1: 'Nov 1', current: s => `Current ${s}`,
+            limit: `Maximum ${MAX_COUNTRIES} countries.`, count: n => `${n}/${MAX_COUNTRIES}`,
+            empty: 'Pick at least one country.', noData: 'No data for this country.',
+            level: 'Level', onDate: 'on', median5: n => `${n}-year median`, range: 'Band',
+            above: pct => `above ${pct}% of years`, vsPrev: 'vs same day previous season',
+            seasonsUsed: (k, from) => `Band over ${k} seasons, from ${from}`, pt: 'pp'
+        }
+    };
+
+    // 365 posizioni dal 1 marzo al 28 febbraio. Il 29 febbraio non ha posizione:
+    // cosi' gli anni bisestili restano allineati agli altri.
+    const POS = [];
+    for (let p = 0; p < 365; p++) {
+        const d = new Date(Date.UTC(2025, 2, 1 + p));
+        POS.push({ m: d.getUTCMonth() + 1, d: d.getUTCDate() });
+    }
+    const NOV1_IDX = POS.findIndex(x => x.m === 11 && x.d === 1);
+
+    let hist = null;
+    const cache = {};
+    let chart = null;
+    let lang = 'it';
+    const state = { selected: ['DE'], years: 5, showBand: true, showYears: true, search: '' };
+
+    const t = k => TXT[lang][k];
+    const num = (v, dec = 1) => v.toLocaleString(lang === 'it' ? 'it-IT' : 'en-GB', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    const countryName = code => lang === 'it' ? hist.countries[code].name : (NAMES_EN[code] || hist.countries[code].name);
+    const seasonLabel = s => `${s}/${String(s + 1).slice(2)}`;
+    const posLabel = p => `${POS[p].d} ${MONTHS[lang][POS[p].m - 1]}`;
+
+    // ---- dati --------------------------------------------------------------
+
+    function cdata(code) {
+        if (!cache[code]) {
+            const c = hist.countries[code];
+            const [y, m, d] = c.start.split('-').map(Number);
+            cache[code] = { startDay: Date.UTC(y, m - 1, d) / 86400000, values: c.values };
+        }
+        return cache[code];
+    }
+
+    // Valori sotto 0,5 ignorati: sono "paese senza dati", non un livello reale.
+    function valueOn(code, y, m, d) {
+        const c = cdata(code);
+        const i = Date.UTC(y, m - 1, d) / 86400000 - c.startDay;
+        if (i < 0 || i >= c.values.length) return null;
+        const v = c.values[i];
+        return (v === null || v < 0.5) ? null : v;
+    }
+
+    function seasonSeries(code, S) {
+        return POS.map(({ m, d }) => valueOn(code, m >= 3 ? S : S + 1, m, d));
+    }
+
+    function lastDateOf(code) {
+        const c = cdata(code);
+        for (let i = c.values.length - 1; i >= 0; i--) {
+            const v = c.values[i];
+            if (v !== null && v >= 0.5) return new Date((c.startDay + i) * 86400000);
+        }
+        return null;
+    }
+
+    // La stagione in corso e' quella che contiene l'ultimo dato: cambia da sola
+    // quando i dati superano il 1 marzo.
+    function currentSeasonOf(code) {
+        const dt = lastDateOf(code);
+        return dt.getUTCMonth() + 1 >= 3 ? dt.getUTCFullYear() : dt.getUTCFullYear() - 1;
+    }
+
+    // Ultime n stagioni complete prima di quella in corso (almeno 300 giorni validi).
+    function bandSeasons(code, n) {
+        const cur = currentSeasonOf(code);
+        const out = [];
+        for (let S = cur - 1; S >= 2011 && out.length < n; S--) {
+            const series = seasonSeries(code, S);
+            if (series.filter(v => v !== null).length >= 300) out.push({ S, series });
+        }
+        return out.reverse();
+    }
+
+    function bandStats(seasons) {
+        return POS.map((_, p) => {
+            const vals = seasons.map(s => s.series[p]).filter(v => v !== null).sort((a, b) => a - b);
+            if (!vals.length) return { min: null, max: null, med: null, vals };
+            const mid = vals.length >> 1;
+            const med = vals.length % 2 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2;
+            return { min: vals[0], max: vals[vals.length - 1], med, vals };
+        });
+    }
+
+    // ---- interfaccia -------------------------------------------------------
+
+    function codesSorted() {
+        const codes = Object.keys(hist.countries);
+        return codes.sort((a, b) => {
+            if (a === 'EU') return -1;
+            if (b === 'EU') return 1;
+            return countryName(a).localeCompare(countryName(b), lang);
+        });
+    }
+
+    function toggleCountry(code) {
+        const i = state.selected.indexOf(code);
+        const note = document.getElementById('limitNote');
+        if (i >= 0) {
+            state.selected.splice(i, 1);
+            note.classList.add('hidden');
+        } else if (state.selected.length >= MAX_COUNTRIES) {
+            note.innerText = t('limit');
+            note.classList.remove('hidden');
+            return;
+        } else {
+            state.selected.push(code);
+            note.classList.add('hidden');
+        }
+        render();
+    }
+
+    function renderPicker() {
+        const chips = document.getElementById('chips');
+        chips.innerHTML = '';
+        state.selected.forEach((code, i) => {
+            const single = state.selected.length === 1;
+            const color = single ? CURRENT_COLOR : MULTI_COLORS[i];
+            const chip = document.createElement('button');
+            chip.className = 'flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold rounded-full bg-slate-800 border border-slate-700 hover:border-slate-500';
+            chip.innerHTML = `<span class="w-2 h-2 rounded-full" style="background:${color}"></span>${countryName(code)}<span class="text-slate-500">&times;</span>`;
+            chip.onclick = () => toggleCountry(code);
+            chips.appendChild(chip);
+        });
+        document.getElementById('countCounter').innerText = t('count')(state.selected.length);
+
+        const list = document.getElementById('countryList');
+        list.innerHTML = '';
+        const q = state.search.trim().toLowerCase();
+        codesSorted().forEach(code => {
+            const name = countryName(code);
+            if (q && !name.toLowerCase().includes(q) && !code.toLowerCase().includes(q)) return;
+            const on = state.selected.includes(code);
+            const row = document.createElement('button');
+            row.className = 'w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-left hover:bg-slate-900 ' + (on ? 'text-white' : 'text-slate-400');
+            row.innerHTML = `<span>${name}</span><span class="text-emerald-400">${on ? '&#10003;' : ''}</span>`;
+            row.onclick = () => toggleCountry(code);
+            list.appendChild(row);
+        });
+    }
+
+    function readoutHTML(code, color) {
+        const cur = currentSeasonOf(code);
+        const series = seasonSeries(code, cur);
+        let last = -1;
+        for (let p = series.length - 1; p >= 0; p--) { if (series[p] !== null) { last = p; break; } }
+        if (last < 0) return `<div class="text-xs text-slate-500">${countryName(code)}: ${t('noData')}</div>`;
+
+        const v = series[last];
+        const seasons = bandSeasons(code, state.years);
+        const stat = bandStats(seasons)[last];
+        const prev = seasonSeries(code, cur - 1)[last];
+
+        let rows = '';
+        if (stat.vals.length) {
+            const below = stat.vals.filter(x => x < v).length;
+            const pct = Math.round(100 * below / stat.vals.length);
+            const dMed = v - stat.med;
+            rows += `<div class="flex justify-between text-[11px]"><span class="text-slate-500">${t('median5')(seasons.length)}</span><span class="font-mono text-slate-300">${num(stat.med)}% <span class="${dMed < 0 ? 'text-red-400' : 'text-emerald-400'}">(${dMed >= 0 ? '+' : ''}${num(dMed)} ${t('pt')})</span></span></div>`;
+            rows += `<div class="flex justify-between text-[11px]"><span class="text-slate-500">${t('range')}</span><span class="font-mono text-slate-300">${num(stat.min)}% &ndash; ${num(stat.max)}%</span></div>`;
+            rows += `<div class="flex justify-between text-[11px]"><span class="text-slate-500"></span><span class="text-slate-300">${t('above')(pct)}</span></div>`;
+        }
+        if (prev !== null) {
+            const dPrev = v - prev;
+            rows += `<div class="flex justify-between text-[11px]"><span class="text-slate-500">${t('vsPrev')}</span><span class="font-mono ${dPrev < 0 ? 'text-red-400' : 'text-emerald-400'}">${dPrev >= 0 ? '+' : ''}${num(dPrev)} ${t('pt')}</span></div>`;
+        }
+        if (seasons.length && seasons.length < state.years) {
+            rows += `<div class="text-[10px] text-amber-400">${t('seasonsUsed')(seasons.length, seasons[0].S)}</div>`;
+        }
+        return `<div class="p-3 bg-slate-950/50 border border-slate-800 rounded-xl space-y-1">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-slate-200 flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background:${color}"></span>${countryName(code)}</span>
+                <span class="text-lg font-bold font-mono" style="color:${color}">${num(v)}%</span>
+            </div>
+            <div class="text-[10px] text-slate-500">${t('level')} ${t('onDate')} ${posLabel(last)}</div>
+            ${rows}
+        </div>`;
+    }
+
+    function chartDatasets() {
+        const single = state.selected.length === 1;
+        const datasets = [];
+
+        if (single) {
+            const code = state.selected[0];
+            const seasons = bandSeasons(code, state.years);
+            const stats = bandStats(seasons);
+            if (seasons.length) {
+                if (state.showBand) {
+                    datasets.push({ label: t('band')(seasons[0].S, seasons[seasons.length - 1].S), role: 'bandMax', data: stats.map(s => s.max),
+                        borderWidth: 0, borderColor: 'rgba(148,163,184,0.5)', backgroundColor: 'rgba(148,163,184,0.22)', pointRadius: 0, fill: '+1', order: 9 });
+                    datasets.push({ label: t('bandMin'), role: 'bandMin', data: stats.map(s => s.min),
+                        borderWidth: 0, pointRadius: 0, fill: false, order: 9 });
+                    datasets.push({ label: t('median'), role: 'median', data: stats.map(s => s.med),
+                        borderColor: '#cbd5e1', borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, fill: false, order: 4 });
+                }
+                if (state.showYears) {
+                    seasons.forEach((s, i) => datasets.push({ label: seasonLabel(s.S), role: 'year', tip: false, data: s.series,
+                        borderColor: YEAR_COLORS[i % YEAR_COLORS.length], borderWidth: 1.2, pointRadius: 0, fill: false, order: 6 }));
+                }
+            }
+            const cur = currentSeasonOf(code);
+            datasets.push({ label: t('current')(seasonLabel(cur)), role: 'current', data: seasonSeries(code, cur),
+                borderColor: CURRENT_COLOR, borderWidth: 3.5, pointRadius: 0, fill: false, order: 0 });
+        } else {
+            state.selected.forEach((code, i) => {
+                const cur = currentSeasonOf(code);
+                datasets.push({ label: `${countryName(code)} ${seasonLabel(cur)}`, role: 'current', data: seasonSeries(code, cur),
+                    borderColor: MULTI_COLORS[i], borderWidth: 3, pointRadius: 0, fill: false, order: i });
+            });
+        }
+
+        datasets.push({ label: t('target'), role: 'target', tip: false, data: Array(365).fill(90),
+            borderColor: 'rgba(16,185,129,0.4)', borderWidth: 1.5, borderDash: [3, 3], pointRadius: 0, fill: false, order: 8 });
+        return datasets;
+    }
+
+    const nov1Plugin = {
+        id: 'nov1',
+        afterDatasetsDraw(c) {
+            const { ctx, chartArea, scales } = c;
+            const x = scales.x.getPixelForValue(NOV1_IDX);
+            ctx.save();
+            ctx.strokeStyle = 'rgba(148,163,184,0.5)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(x, chartArea.top);
+            ctx.lineTo(x, chartArea.bottom);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '11px Inter, sans-serif';
+            ctx.fillText(t('nov1'), x + 4, chartArea.top + 12);
+            ctx.restore();
+        }
+    };
+
+    function render() {
+        renderPicker();
+
+        const single = state.selected.length === 1;
+        document.getElementById('singleOptions').classList.toggle('hidden', !single);
+        document.getElementById('chartTitle').innerText = single ? t('titleSingle') : t('titleMulti');
+        document.getElementById('chartSub').innerText = single ? t('subSingle')(state.years) : t('subMulti');
+
+        const empty = document.getElementById('emptyMsg');
+        const readouts = document.getElementById('readouts');
+        if (chart) { chart.destroy(); chart = null; }
+        if (!state.selected.length) {
+            empty.innerText = t('empty');
+            empty.classList.remove('hidden');
+            readouts.innerHTML = '';
+            return;
+        }
+        empty.classList.add('hidden');
+
+        readouts.innerHTML = state.selected
+            .map((code, i) => readoutHTML(code, single ? CURRENT_COLOR : MULTI_COLORS[i]))
+            .join('');
+
+        chart = new Chart(document.getElementById('historyChart').getContext('2d'), {
+            type: 'line',
+            plugins: [nov1Plugin],
+            data: { labels: POS.map((_, p) => posLabel(p)), datasets: chartDatasets() },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { labels: { color: '#94a3b8', boxWidth: 20, filter: (item, data) => data.datasets[item.datasetIndex].role !== 'bandMin' } },
+                    tooltip: {
+                        filter: item => item.dataset.tip !== false && item.raw !== null,
+                        callbacks: { label: item => `${item.dataset.label}: ${num(item.raw)}%` }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: ctx => POS[ctx.index] && POS[ctx.index].d === 1 ? '#1e293b' : 'transparent' },
+                        ticks: { color: '#94a3b8', autoSkip: false, maxRotation: 0,
+                                 callback: (v, i) => POS[i].d === 1 ? MONTHS[lang][POS[i].m - 1] : '' }
+                    },
+                    y: { min: 0, suggestedMax: 100, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', callback: v => v + '%' } }
+                }
+            }
+        });
+    }
+
+    function toggleLanguage() {
+        const btn = document.getElementById('langToggleBtn');
+        if (lang === 'it') {
+            lang = 'en'; btn.innerHTML = '🇮🇹 Passa all\'Italiano';
+            document.querySelectorAll('.lang-it').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.lang-en').forEach(el => el.classList.remove('hidden'));
+        } else {
+            lang = 'it'; btn.innerHTML = '🇬🇧 Switch to English';
+            document.querySelectorAll('.lang-en').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.lang-it').forEach(el => el.classList.remove('hidden'));
+        }
+        if (hist) render();
+    }
+
+    document.getElementById('langToggleBtn').addEventListener('click', toggleLanguage);
+    document.getElementById('countrySearch').addEventListener('input', e => { state.search = e.target.value; renderPicker(); });
+    document.getElementById('yearsSelect').addEventListener('change', e => { state.years = parseInt(e.target.value, 10); render(); });
+    document.getElementById('showBand').addEventListener('change', e => { state.showBand = e.target.checked; render(); });
+    document.getElementById('showYears').addEventListener('change', e => { state.showYears = e.target.checked; render(); });
+
+    window.onload = function() {
+        fetch('./history.json')
+            .then(r => { if (!r.ok) throw new Error('history.json non disponibile'); return r.json(); })
+            .then(json => {
+                hist = json;
+                if (!hist.countries[state.selected[0]]) state.selected = [codesSorted()[0]];
+                document.getElementById('updatedText').innerText = ' | Updated: ' + hist.updated.slice(0, 10);
+                render();
+            })
+            .catch(err => {
+                console.error(err);
+                const empty = document.getElementById('emptyMsg');
+                empty.innerText = String(err.message || err);
+                empty.classList.remove('hidden');
+            });
+    };
+</script>
+</body>
+</html>
