@@ -509,17 +509,16 @@
                 euHist = jsonData.euHist; deHist = jsonData.deHist; itHist = jsonData.itHist;
                 histLength = euHist.length;
                 ratesData = jsonData.rates;
-
-                sliderEU.value = ratesData.EU[selectedWindow];
-                sliderDE.value = ratesData.DE[selectedWindow];
-                sliderIT.value = ratesData.IT[selectedWindow];
-
+    
+                // Forza l'aggiornamento grafico e visivo del pulsante attivo
+                changeWindow(selectedWindow);
+    
                 drawdownStart.value = defaultDrawdownStart();
                 applySeverityQuiet('avg');
-
+    
                 const lastDate = baseLabels[histLength - 1];
                 document.getElementById('lastUpdateTextIT').innerText = " | Last data: " + lastDate;
-
+    
                 initChart();
                 updateSim();
             })
