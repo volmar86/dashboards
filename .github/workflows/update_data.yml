@@ -127,14 +127,14 @@ jobs:
 
         # Calculate multiple multi-scale rolling dynamic window averages
         def calc_windows(h_list):
-            r15 = (h_list[-1] - h_list[-15]) / 15 if len(h_list) >= 15 else 0.25
-            r30 = (h_list[-1] - h_list[-30]) / 30 if len(h_list) >= 30 else 0.26
-            r60 = (h_list[-1] - h_list[-60]) / 60 if len(h_list) >= 60 else 0.22
-            return round(r15, 2), round(r30, 2), round(r60, 2)
+            r7 = (h_list[-1] - h_list[-8]) / 7 if len(h_list) >= 8 else 0.25
+            r15 = (h_list[-1] - h_list[-16]) / 15 if len(h_list) >= 16 else 0.25
+            r30 = (h_list[-1] - h_list[-31]) / 30 if len(h_list) >= 31 else 0.26
+            return round(r7, 2), round(r15, 2), round(r30, 2)
 
-        eu_15, eu_30, eu_60 = calc_windows(eu_hist)
-        de_15, de_30, de_60 = calc_windows(de_hist)
-        it_15, it_30, it_60 = calc_windows(it_hist)
+        eu_7, eu_15, eu_30 = calc_windows(eu_hist)
+        de_7, de_15, de_30 = calc_windows(de_hist)
+        it_7, it_15, it_30 = calc_windows(it_hist)
 
         # Extract 3-year aggregate seasonal profiles for autumn parameters
         eu_sept, eu_oct = get_seasonal_rates('EU')
@@ -147,9 +147,9 @@ jobs:
             'deHist': de_hist,
             'itHist': it_hist,
             'rates': {
-                'EU': {'15': eu_15, '30': eu_30, '60': eu_60, 'septHist': eu_sept, 'octHist': eu_oct},
-                'DE': {'15': de_15, '30': de_30, '60': de_60, 'septHist': de_sept, 'octHist': de_oct},
-                'IT': {'15': it_15, '30': it_30, '60': it_60, 'septHist': it_sept, 'octHist': it_oct}
+                'EU': {'7': eu_7, '15': eu_15, '30': eu_30, 'septHist': eu_sept, 'octHist': eu_oct},
+                'DE': {'7': de_7, '15': de_15, '30': de_30, 'septHist': de_sept, 'octHist': de_oct},
+                'IT': {'7': it_7, '15': it_15, '30': it_30, 'septHist': it_sept, 'octHist': it_oct}
             }
         }
 
