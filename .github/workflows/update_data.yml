@@ -37,7 +37,7 @@ jobs:
         today = datetime.utcnow()
         season_year = today.year if today.month >= 4 else today.year - 1
         start_date = f'{season_year - 1}-10-01'
-        target_end = f'{season_year}-11-01'
+        target_end = today.strftime('%Y-%m-%d')
 
 
         def fetch_data(region_code, custom_start=None, custom_end=None):
