@@ -146,7 +146,7 @@
                     <input type="range" id="rateIT" min="-1.0" max="1.0" step="0.01" class="w-full h-1.5 bg-slate-950 rounded-lg cursor-pointer accent-blue-500">
                 </div>
 
-                <div class="p-4 bg-slate-950/50 border border-slate-800 rounded-xl space-y-2">
+                <div id="mainReadBox" class="p-4 bg-slate-950/50 border border-slate-800 rounded-xl space-y-2">
                     <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-it">Livelli previsti al 1 Novembre</div>
                     <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-en hidden">Predicted Inventory on Nov 1</div>
                     <div class="flex justify-between items-center border-b border-slate-900 pb-1">
@@ -163,7 +163,7 @@
                     </div>
                 </div>
 
-                <div class="p-4 bg-slate-950/50 border border-slate-800 rounded-xl space-y-2">
+                <div id="winterReadBox" style="display:none" class="p-4 bg-slate-950/50 border border-slate-800 rounded-xl space-y-2">
                     <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-it">Livelli previsti in inverno</div>
                     <div class="text-[11px] uppercase tracking-wider text-slate-400 font-bold lang-en hidden">Predicted winter inventory</div>
                     <div class="grid grid-cols-4 gap-1 text-right items-center">
@@ -429,25 +429,35 @@
         storageChart.data.datasets[7].data = Array(n).fill(80);
         storageChart.update();
 
-        // Lettura fissata al 1 novembre, non all'ultimo punto della proiezione:
-        // con lo svuotamento acceso l'ultimo punto cade in pieno inverno.
-        let idx = -1;
-        for (let i = histLength - 1; i < datesLabels.length; i++) {
-            if (datesLabels[i].slice(5) === '11-01') { idx = i; break; }
+        // Lettura fissata al 1 novembre della stagione in corso (target 90%/80%).
+        // Passato il 1 novembre non e' piu' una previsione: il riquadro si
+        // nasconde fino al 1 aprile, quando defaultDrawdownStart() passa al
+        // 1 novembre della stagione successiva e il riquadro riappare da solo.
+        // I due riquadri si danno il cambio: il 1 novembre da aprile al 1 novembre,
+        // "Livelli previsti in inverno" da dopo il 1 novembre al 31 marzo.
+        const seasonNov1 = defaultDrawdownStart();
+        const mainBox = document.getElementById('mainReadBox');
+        const winterBox = document.getElementById('winterReadBox');
+        const afterNov1 = baseLabels[histLength - 1] > seasonNov1;
+        winterBox.style.display = afterNov1 ? '' : 'none';
+        if (afterNov1) {
+            mainBox.style.display = 'none';
+        } else {
+            mainBox.style.display = '';
+            const idx = datesLabels.indexOf(seasonNov1);
+
+            const finalEU = euProj[idx];
+            const finalDE = deProj[idx];
+            const finalIT = itProj[idx];
+
+            txtEU.innerText = finalEU.toFixed(2) + '%';
+            txtDE.innerText = finalDE.toFixed(2) + '%';
+            txtIT.innerText = finalIT.toFixed(2) + '%';
+
+            txtEU.style.color = finalEU < 90 ? '#ef4444' : '#10b981';
+            txtDE.style.color = finalDE < 80 ? '#ef4444' : '#f59e0b';
+            txtIT.style.color = finalIT < 90 ? '#ef4444' : '#3b82f6';
         }
-        if (idx === -1) idx = euProj.length - 1;
-
-        const finalEU = euProj[idx];
-        const finalDE = deProj[idx];
-        const finalIT = itProj[idx];
-
-        txtEU.innerText = finalEU.toFixed(2) + '%';
-        txtDE.innerText = finalDE.toFixed(2) + '%';
-        txtIT.innerText = finalIT.toFixed(2) + '%';
-
-        txtEU.style.color = finalEU < 90 ? '#ef4444' : '#10b981';
-        txtDE.style.color = finalDE < 80 ? '#ef4444' : '#f59e0b';
-        txtIT.style.color = finalIT < 90 ? '#ef4444' : '#3b82f6';
 
         // Letture invernali: valore della curva alla data, "n/d" se la curva
         // li' non e' disegnata (tasso non negativo dopo il cutoff).
