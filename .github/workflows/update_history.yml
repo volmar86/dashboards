@@ -2,7 +2,7 @@ name: Aggiornamento Storico AGSI
 
 on:
   schedule:
-    - cron: '0 6 * * 2' # Runs each Tuesday at 06:00 UTC
+    - cron: '30 5 * * *' # Runs each day at 05:30 UTC
   workflow_dispatch: # Can be run manually with a click on GitHub
 
 permissions:
