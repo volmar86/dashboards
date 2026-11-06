@@ -2,7 +2,7 @@ name: Aggiornamento Dati AGSI
 
 on:
   schedule:
-    - cron: '0 6 * * 1' # Runs each Monday at 06:00 UTC
+    - cron: '0 4 * * *' # Runs each day at 05:00 UTC
   workflow_dispatch: # Can be run manually with a click on GitHub
 
 permissions:
