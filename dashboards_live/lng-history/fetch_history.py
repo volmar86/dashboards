@@ -18,6 +18,7 @@ import os
 import sys
 import time
 from datetime import date, datetime, timedelta, timezone
+from urllib.parse import quote
 
 import requests
 
@@ -44,8 +45,30 @@ COUNTRIES = {
     'DE': 'Germania', 'HU': 'Ungheria', 'IE': 'Irlanda', 'IT': 'Italia',
     'LV': 'Lettonia', 'NL': 'Paesi Bassi', 'PL': 'Polonia', 'PT': 'Portogallo',
     'RO': 'Romania', 'SK': 'Slovacchia', 'ES': 'Spagna', 'SE': 'Svezia',
-    'GB': 'Regno Unito', 'UA': 'Ucraina',
+    'GB': 'Regno Unito (pre-Brexit)', 'UA': 'Ucraina',
+    'UK': 'Regno Unito',
 }
+
+# AGSI tiene due entita' britanniche: 'GB' (pre-Brexit, serie ferma al
+# 30/12/2020) e 'GB*' (post-Brexit, pubblicata tuttora). L'asterisco non si
+# puo' usare come chiave JSON senza rischiare di rompere selettori CSS e
+# getElementById nella dashboard, quindi si interroga l'API con 'GB*' e si
+# salva sotto 'UK'.
+# ATTENZIONE: il Regno Unito ha Dataset Coverage ~29%, cioe' solo una parte
+# degli impianti riporta ad AGSI. La percentuale 'full' e' calcolata su quella
+# parte, non sul parco nazionale.
+API_CODE = {'UK': 'GB*'}
+
+# Paesi la cui serie su AGSI comincia dopo HISTORY_START: evita decine di
+# chiamate a vuoto sugli anni in cui il paese non esisteva come entita'.
+COUNTRY_START = {'UK': date(2021, 1, 1)}
+
+# Serie chiuse: oltre questa data non c'e' piu' niente da chiedere.
+COUNTRY_END = {'GB': date(2020, 12, 31)}
+
+# Forma del parametro country che l'API ha accettato, per codice. Si riempie
+# da sola al primo tentativo riuscito e vale per il resto dell'esecuzione.
+GOOD_VARIANT = {}
 
 deadline = time.time() + MAX_MINUTES * 60
 
@@ -97,22 +120,42 @@ def fetch_range(code, d_from, d_to, expect_rows=False):
     risposta vuota e' sospetta (a volte AGSI risponde vuoto dopo un errore):
     si riprova un paio di volte prima di accettarla.
     """
-    param = 'type=EU' if code == 'EU' else f'country={code}'
+    if code == 'EU':
+        variants = ['type=EU']
+    else:
+        api = API_CODE.get(code, code)
+        # Un codice con caratteri speciali (GB*) puo' essere accettato grezzo
+        # o solo percent-encoded, a seconda di come l'API fa il parsing: si
+        # prova la forma grezza e, se la prima pagina torna vuota, l'altra.
+        variants = [f'country={api}']
+        enc = quote(api, safe='')
+        if enc != api:
+            variants.append(f'country={enc}')
+        # Una volta scoperta la forma accettata, la si riusa per tutto il run.
+        if code in GOOD_VARIANT:
+            variants = [GOOD_VARIANT[code]]
     out = {}
     page = 1
     empty_tries = 0
+    vi = 0
     while True:
-        url = (f'https://agsi.gie.eu/api?{param}&from={d_from.isoformat()}'
+        url = (f'https://agsi.gie.eu/api?{variants[vi]}&from={d_from.isoformat()}'
                f'&to={d_to.isoformat()}&size=300&page={page}')
         body = get_json(url)
         rows = body.get('data', [])
         if not rows:
+            if page == 1 and vi + 1 < len(variants):
+                # La forma del codice non e' stata accettata: prova la successiva.
+                vi += 1
+                print(f'  {code}: nessun dato con "{variants[vi - 1]}", provo "{variants[vi]}"', flush=True)
+                continue
             if page == 1 and expect_rows and empty_tries < 2:
                 empty_tries += 1
                 print(f'  risposta vuota {code} {d_from}..{d_to}, riprovo tra {RETRY_SLEEP}s', flush=True)
                 time.sleep(RETRY_SLEEP)
                 continue
             break
+        GOOD_VARIANT.setdefault(code, variants[vi])
         new = False
         for row in rows:
             day = row.get('gasDayStart')
@@ -287,11 +330,17 @@ def main():
             flow_tail = flow_from
 
         # 3) coda: dal piu' indietro fra livelli e flussi fino a oggi
-        lv_tail = (date.fromisoformat(max(lv)) - timedelta(days=OVERLAP_DAYS)) if lv else HISTORY_START
-        cur = max(HISTORY_START, min(lv_tail, flow_tail))
-        print(f'{code}: da {cur.isoformat()} '
-              f'({len(lv)} giorni livelli, {len(fl)} giorni flussi)', flush=True)
-        run(cur, today, bool(lv), 'coda')
+        start = COUNTRY_START.get(code, HISTORY_START)
+        lv_tail = (date.fromisoformat(max(lv)) - timedelta(days=OVERLAP_DAYS)) if lv else start
+        cur = max(start, min(lv_tail, flow_tail))
+        end = min(today, COUNTRY_END.get(code, today))
+        if cur <= end:
+            print(f'{code}: da {cur.isoformat()} '
+                  f'({len(lv)} giorni livelli, {len(fl)} giorni flussi)', flush=True)
+            run(cur, end, bool(lv), 'coda')
+        else:
+            print(f'{code}: serie chiusa, niente da aggiornare '
+                  f'({len(lv)} giorni livelli)', flush=True)
 
         save(levels, flows)   # salva dopo ogni paese
         if time.time() > deadline:
